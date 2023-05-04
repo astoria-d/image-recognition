@@ -53,13 +53,25 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-*.vpp
-*.log
 old/*
 tmp/*
 db/*
 incremental/*
 incremental_db/*
 output_files/*
+
+*.vpp
+*.log
+*.rpt
 *_dump.txt
 
+
+simulation/modelsim/cam_vga_test01_iputf_input/*
+simulation/modelsim/rtl_work/*
+simulation/modelsim/work/*
+
+simulation/modelsim/msim_transcript
+simulation/modelsim/transcript
+simulation/modelsim/*.wlf
+simulation/modelsim/*.cr.mti
+simulation/modelsim/*.xrf
