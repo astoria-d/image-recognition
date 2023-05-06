@@ -6,18 +6,20 @@ entity cam_vga_test01 is
 port (
 	-- input clock 50 mhz
 	pi_clk_50m 	: in std_logic;
+
 	-- reset button
 	pi_rst_n     	: in std_logic;
-
+	-- push button 0 - 3
+	pi_btn	     	: in std_logic_vector(3 downto 0);
 	-- switch input
-	sw_input     	: in std_logic_vector(6 downto 0);
+	pi_switch		: in std_logic_vector(6 downto 0);
 
 	-- vga output
 	po_h_sync_n		: out std_logic;
 	po_v_sync_n		: out std_logic;
-	po_r			: out std_logic_vector(3 downto 0);
-	po_g			: out std_logic_vector(3 downto 0);
-	po_b			: out std_logic_vector(3 downto 0);
+	po_r				: out std_logic_vector(3 downto 0);
+	po_g				: out std_logic_vector(3 downto 0);
+	po_b				: out std_logic_vector(3 downto 0);
 
 	-- camera interface
 	po_cam_scl		: out std_logic;
@@ -34,8 +36,16 @@ port (
 	pi_cam_vsync	: in std_logic;
 	pi_cam_pclk		: in std_logic;
 
-	pi_cam_y		: in std_logic_vector(1 downto 0);
-	pi_cam_d		: in std_logic_vector(7 downto 0);
+	pi_cam_y			: in std_logic_vector(1 downto 0);
+	pi_cam_d			: in std_logic_vector(7 downto 0);
+
+	--7 seg LED 0
+	po_svn_seg0		: out std_logic_vector(6 downto 0);
+	po_svn_seg1		: out std_logic_vector(6 downto 0);
+	po_svn_seg2		: out std_logic_vector(6 downto 0);
+	po_svn_seg3		: out std_logic_vector(6 downto 0);
+	po_svn_seg4		: out std_logic_vector(6 downto 0);
+	po_svn_seg5		: out std_logic_vector(6 downto 0);
 
 	--logic analyzer reference clock
 	jtag_clk		: out std_logic
@@ -72,21 +82,6 @@ component PLL
 	);
 end component;
 
-
-signal h_cnt : integer range 0 to 800 - 1 := 0;
-signal v_cnt : integer range 0 to 540 - 1 := 0;
-
-signal cm_i2c_ce			: std_logic;
-signal cm_i2c_we			: std_logic;
-signal cm_i2c_dev_addr		: std_logic_vector(6 downto 0) := "0000000";
-signal cm_i2c_reg_addr		: std_logic_vector(7 downto 0);
-signal cm_i2c_set_value		: std_logic_vector(7 downto 0);
-signal cm_i2c_read_value		: std_logic_vector(7 downto 0);
-
-signal rst 			: std_logic;
-signal tmp_cam_clk 	: std_logic;
-signal pll_locked 	: std_logic;
-
 type i2c_set_t is
 record
 	we		 : std_logic;
@@ -97,6 +92,8 @@ end record;
 
 constant I2C_FRM_CNT : integer := 6400 * 4;
 constant I2C_SET_CNT : integer := 175;
+
+constant DEV_END_MARKER : std_logic_vector(6 downto 0) := "0000000";
 
 type i2c_init_array is array (0 to I2C_SET_CNT - 1) of i2c_set_t;
 
@@ -279,13 +276,14 @@ constant i2c_init_data_set : i2c_init_array := (
 );
 
 
-type i2c_init_array_chk is array (0 to 2) of i2c_set_t;
+type i2c_init_array_chk is array (0 to 3) of i2c_set_t;
 
 constant i2c_init_data_set_chk : i2c_init_array_chk := (
 -- ov2640
 	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8))),
 	('0', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#0a#, 8)), "ZZZZZZZZ"),
-	('0', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#0b#, 8)), "ZZZZZZZZ")
+	('0', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#0b#, 8)), "ZZZZZZZZ"),
+	('0', DEV_END_MARKER ,"00000000", "ZZZZZZZZ")
 
 -- ov7670
 -- ov7675
@@ -300,28 +298,147 @@ constant i2c_init_data_set_chk : i2c_init_array_chk := (
 --	('0', std_logic_vector(to_unsigned(16#50#, 7)) ,std_logic_vector(to_unsigned(16#1d#, 8)), "ZZZZZZZZ")
 );
 
+function hex_to_7seg (
+	indata : in std_logic_vector
+	) return std_logic_vector
+	is
+variable retdata : std_logic_vector(6 downto 0);
+begin
+	if (unsigned(indata) = 0) then
+		retdata := "1000000";
+	elsif (unsigned(indata) = 1) then
+		retdata := "1111001";
+	elsif (unsigned(indata) = 2) then
+		retdata := "0100100";
+	elsif (unsigned(indata) = 3) then
+		retdata := "0110000";
+	elsif (unsigned(indata) = 4) then
+		retdata := "0011001";
+	elsif (unsigned(indata) = 5) then
+		retdata := "0010010";
+	elsif (unsigned(indata) = 6) then
+		retdata := "0000010";
+	elsif (unsigned(indata) = 7) then
+		retdata := "1011000";
+	elsif (unsigned(indata) = 8) then
+		retdata := "0000000";
+	elsif (unsigned(indata) = 9) then
+		retdata := "0010000";
+	elsif (unsigned(indata) = 10) then
+		retdata := "0001000";
+	elsif (unsigned(indata) = 11) then
+		retdata := "0000011";
+	elsif (unsigned(indata) = 12) then
+		retdata := "1000110";
+	elsif (unsigned(indata) = 13) then
+		retdata := "0100001";
+	elsif (unsigned(indata) = 14) then
+		retdata := "0000110";
+	elsif (unsigned(indata) = 15) then
+		retdata := "0001110";
+	else
+		retdata := "1111111";
+	end if;
+	return retdata;
+end hex_to_7seg;
+
+function hex_to_7seg (
+	indata : in unsigned
+	) return std_logic_vector
+	is
+variable indata_v : std_logic_vector(indata'length - 1 downto 0);
+begin
+	indata_v := std_logic_vector(indata);
+	return hex_to_7seg(indata_v);
+end hex_to_7seg;
+
+signal h_cnt 					: integer range 0 to 800 - 1 := 0;
+signal v_cnt 					: integer range 0 to 540 - 1 := 0;
+
+signal cm_i2c_ce				: std_logic;
+signal cm_i2c_we				: std_logic;
+signal cm_i2c_dev_addr		: std_logic_vector(6 downto 0) := "0000000";
+signal cm_i2c_reg_addr		: std_logic_vector(7 downto 0);
+signal cm_i2c_set_value		: std_logic_vector(7 downto 0);
+signal cm_i2c_read_value	: std_logic_vector(7 downto 0);
+
+signal fpga_rst 				: std_logic;
+signal usr_rst 				: std_logic;
+signal tmp_cam_clk 			: std_logic;
+signal pll_locked 			: std_logic;
+
+signal usr_mode 				: unsigned(1 downto 0) := "00";
+
 begin
 
+	fpga_rst <= not pi_rst_n;
+	usr_rst <= not pi_btn(0);
+	po_cam_rst <= '1';
+	po_cam_pwdn <= '0';
+	po_cam_xvclk <= tmp_cam_clk;
+
+	-- i2c encoder
 	cm_i2c_inst : cam_i2c port map (
 		pi_clk_50m,
 		cm_i2c_ce, cm_i2c_we, cm_i2c_dev_addr, cm_i2c_reg_addr, cm_i2c_set_value, cm_i2c_read_value, 
 		po_cam_scl, pio_cam_sda);
 
-	rst <= not pi_rst_n;
---	po_cam_rst <= pi_rst_n;
-	po_cam_rst <= '1';
-	po_cam_pwdn <= '0';
---	po_cam_xvclk <= tmp_cam_clk when pll_locked = '1'
---					else '0';
-	po_cam_xvclk <= tmp_cam_clk;
-
-	-- PLL 24 MHz
+	-- PLL 24 MHz for ov2640 system clock
 	pll_inst : PLL port map (
 		pi_clk_50m,
-		rst,
+		fpga_rst,
 		tmp_cam_clk,
 		pll_locked);
 
+	-- i2c device address mode
+	mode_p : process (pi_clk_50m)
+	variable btn_prev : std_logic;
+	begin
+		if (rising_edge(pi_clk_50m)) then
+
+			if (fpga_rst = '1') then
+				usr_mode <= (others => '0');
+				btn_prev := '1';
+			else
+				if (pi_btn(1) = '1' and btn_prev = '0') then
+					usr_mode <= usr_mode + 1;
+				end if;
+				btn_prev := pi_btn(1);
+			end if;
+		end if;
+	end process;
+
+	-- 7 segment display
+	svn_umode_seg_p : process (pi_clk_50m)
+	begin
+		if (rising_edge(pi_clk_50m)) then
+			if (fpga_rst = '1') then
+				po_svn_seg0 <= (others => '1');
+			else
+				po_svn_seg0 <= hex_to_7seg(usr_mode);
+			end if;
+		end if;
+	end process;
+
+	addr_seg_p : process (pi_clk_50m)
+	begin
+		if (rising_edge(pi_clk_50m)) then
+			if (fpga_rst = '1') then
+				po_svn_seg2 <= (others => '1');
+				po_svn_seg3 <= (others => '1');
+			else
+				po_svn_seg2 <= hex_to_7seg(pi_switch(3 downto 0));
+				po_svn_seg3 <= hex_to_7seg(pi_switch(6 downto 4));
+			end if;
+		end if;
+	end process;
+
+	po_svn_seg1 <= (others => '1');
+	po_svn_seg4 <= (others => '1');
+	po_svn_seg5 <= (others => '1');
+
+
+	-- initialize camera
 	cam_set_p : process (pi_clk_50m)
 	variable frm_cnt : integer := 0;
 	variable clk_cnt : integer := 0;
@@ -331,9 +448,9 @@ begin
 	begin
 		if (rising_edge(pi_clk_50m)) then
 
-			cm_i2c_dev_addr <= sw_input;
+			cm_i2c_dev_addr <= pi_switch;
 
-			if (pi_rst_n = '0') then
+			if (usr_rst = '1') then
 				cm_i2c_ce <= '0';
 				cm_i2c_we <= '0';
 				cm_i2c_reg_addr <= (others => '0');
@@ -379,11 +496,12 @@ begin
 		end if;
 	end process;
 
+	-- vga output
 	vga_cnt_p : process (pi_clk_50m)
 	variable div_25 : std_logic := '0';
 	begin
 		if (rising_edge(pi_clk_50m)) then
-			if (pi_rst_n = '0') then
+			if (usr_rst = '1') then
 				h_cnt <= 0;
 				v_cnt <= 0;
 				div_25 := '0';
@@ -414,7 +532,7 @@ begin
 	vga_sync_p : process (pi_clk_50m)
 	begin
 		if (rising_edge(pi_clk_50m)) then
-			if (pi_rst_n = '0') then
+			if (usr_rst = '1') then
 				po_h_sync_n <= '0';
 				po_v_sync_n <= '0';
 			else
@@ -436,7 +554,7 @@ begin
 	vga_out_p : process (pi_clk_50m)
 	begin
 		if (rising_edge(pi_clk_50m)) then
-			if (pi_rst_n = '0') then
+			if (usr_rst = '1') then
 				po_r <= (others => '0');
 				po_g <= (others => '0');
 				po_b <= (others => '0');
@@ -462,6 +580,7 @@ begin
 		end if;
 	end process;
 
+	-- jtag clock
 	jtag_clk_p : process (pi_clk_50m)
 	variable div : unsigned (7 downto 0) := "00000000";
 	begin
