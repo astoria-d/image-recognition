@@ -85,217 +85,226 @@ end component;
 type i2c_set_t is
 record
 	we		 : std_logic;
-	dev_addr : std_logic_vector(6 downto 0);
 	reg_addr : std_logic_vector(7 downto 0);
 	reg_value : std_logic_vector(7 downto 0);
+	delay_cnt : integer;
 end record;
 
 constant I2C_FRM_CNT : integer := 6400 * 4;
-constant I2C_SET_CNT : integer := 175;
+constant I2C_EN_CNT : integer := 5000 * 4;
 
-constant DEV_END_MARKER : std_logic_vector(6 downto 0) := "0000000";
+constant DEV_END_MARKER : std_logic_vector(7 downto 0) := "00000000";
 
-type i2c_init_array is array (0 to I2C_SET_CNT - 1) of i2c_set_t;
+type i2c_init_array is array (0 to 175) of i2c_set_t;
 
-constant i2c_init_data_set : i2c_init_array := (
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#2c#, 8)), std_logic_vector(to_unsigned(16#ff#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#2e#, 8)), std_logic_vector(to_unsigned(16#df#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#3c#, 8)), std_logic_vector(to_unsigned(16#32#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#11#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#09#, 8)), std_logic_vector(to_unsigned(16#02#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#04#, 8)), std_logic_vector(to_unsigned(16#28#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#13#, 8)), std_logic_vector(to_unsigned(16#e5#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#14#, 8)), std_logic_vector(to_unsigned(16#48#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#2c#, 8)), std_logic_vector(to_unsigned(16#0c#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#33#, 8)), std_logic_vector(to_unsigned(16#78#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#3a#, 8)), std_logic_vector(to_unsigned(16#33#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#3b#, 8)), std_logic_vector(to_unsigned(16#fB#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#3e#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#43#, 8)), std_logic_vector(to_unsigned(16#11#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#16#, 8)), std_logic_vector(to_unsigned(16#10#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#39#, 8)), std_logic_vector(to_unsigned(16#92#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#35#, 8)), std_logic_vector(to_unsigned(16#da#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#22#, 8)), std_logic_vector(to_unsigned(16#1a#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#37#, 8)), std_logic_vector(to_unsigned(16#c3#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#23#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#34#, 8)), std_logic_vector(to_unsigned(16#c0#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#36#, 8)), std_logic_vector(to_unsigned(16#1a#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#06#, 8)), std_logic_vector(to_unsigned(16#88#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#07#, 8)), std_logic_vector(to_unsigned(16#c0#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#0d#, 8)), std_logic_vector(to_unsigned(16#87#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#0e#, 8)), std_logic_vector(to_unsigned(16#41#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#4c#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#48#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#5B#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#42#, 8)), std_logic_vector(to_unsigned(16#03#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#4a#, 8)), std_logic_vector(to_unsigned(16#81#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#21#, 8)), std_logic_vector(to_unsigned(16#99#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#24#, 8)), std_logic_vector(to_unsigned(16#40#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#25#, 8)), std_logic_vector(to_unsigned(16#38#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#26#, 8)), std_logic_vector(to_unsigned(16#82#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#5c#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#63#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#46#, 8)), std_logic_vector(to_unsigned(16#22#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#0c#, 8)), std_logic_vector(to_unsigned(16#3c#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#61#, 8)), std_logic_vector(to_unsigned(16#70#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#62#, 8)), std_logic_vector(to_unsigned(16#80#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7c#, 8)), std_logic_vector(to_unsigned(16#05#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#20#, 8)), std_logic_vector(to_unsigned(16#80#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#28#, 8)), std_logic_vector(to_unsigned(16#30#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#6c#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#6d#, 8)), std_logic_vector(to_unsigned(16#80#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#6e#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#70#, 8)), std_logic_vector(to_unsigned(16#02#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#71#, 8)), std_logic_vector(to_unsigned(16#94#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#73#, 8)), std_logic_vector(to_unsigned(16#c1#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#40#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#17#, 8)), std_logic_vector(to_unsigned(16#11#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#18#, 8)), std_logic_vector(to_unsigned(16#43#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#19#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#1a#, 8)), std_logic_vector(to_unsigned(16#4b#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#32#, 8)), std_logic_vector(to_unsigned(16#09#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#37#, 8)), std_logic_vector(to_unsigned(16#c0#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#4f#, 8)), std_logic_vector(to_unsigned(16#ca#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#50#, 8)), std_logic_vector(to_unsigned(16#a8#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#5a#, 8)), std_logic_vector(to_unsigned(16#23#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#6d#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#3d#, 8)), std_logic_vector(to_unsigned(16#38#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#e5#, 8)), std_logic_vector(to_unsigned(16#7f#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#f9#, 8)), std_logic_vector(to_unsigned(16#c0#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#41#, 8)), std_logic_vector(to_unsigned(16#24#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#e0#, 8)), std_logic_vector(to_unsigned(16#14#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#76#, 8)), std_logic_vector(to_unsigned(16#ff#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#33#, 8)), std_logic_vector(to_unsigned(16#a0#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#42#, 8)), std_logic_vector(to_unsigned(16#20#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#43#, 8)), std_logic_vector(to_unsigned(16#18#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#4c#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#87#, 8)), std_logic_vector(to_unsigned(16#d5#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#88#, 8)), std_logic_vector(to_unsigned(16#3f#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#d7#, 8)), std_logic_vector(to_unsigned(16#03#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#d9#, 8)), std_logic_vector(to_unsigned(16#10#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#d3#, 8)), std_logic_vector(to_unsigned(16#82#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c8#, 8)), std_logic_vector(to_unsigned(16#08#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c9#, 8)), std_logic_vector(to_unsigned(16#80#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7c#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7c#, 8)), std_logic_vector(to_unsigned(16#03#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#48#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#48#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7c#, 8)), std_logic_vector(to_unsigned(16#08#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#20#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#10#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#0e#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#90#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#0e#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#1a#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#31#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#5a#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#69#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#75#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#7e#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#88#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#8f#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#96#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#a3#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#af#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#c4#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#d7#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#e8#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#20#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#92#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#06#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#e3#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#05#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#05#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#04#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#96#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#08#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#19#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#02#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#0c#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#24#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#30#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#28#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#26#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#02#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#98#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#80#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c3#, 8)), std_logic_vector(to_unsigned(16#ed#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#a4#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#a8#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c5#, 8)), std_logic_vector(to_unsigned(16#11#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c6#, 8)), std_logic_vector(to_unsigned(16#51#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#bf#, 8)), std_logic_vector(to_unsigned(16#80#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c7#, 8)), std_logic_vector(to_unsigned(16#10#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b6#, 8)), std_logic_vector(to_unsigned(16#66#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b8#, 8)), std_logic_vector(to_unsigned(16#A5#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b7#, 8)), std_logic_vector(to_unsigned(16#64#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b9#, 8)), std_logic_vector(to_unsigned(16#7C#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b3#, 8)), std_logic_vector(to_unsigned(16#af#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b4#, 8)), std_logic_vector(to_unsigned(16#97#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b5#, 8)), std_logic_vector(to_unsigned(16#FF#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b0#, 8)), std_logic_vector(to_unsigned(16#C5#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b1#, 8)), std_logic_vector(to_unsigned(16#94#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#b2#, 8)), std_logic_vector(to_unsigned(16#0f#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c4#, 8)), std_logic_vector(to_unsigned(16#5c#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c0#, 8)), std_logic_vector(to_unsigned(16#64#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c1#, 8)), std_logic_vector(to_unsigned(16#4B#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#8c#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#86#, 8)), std_logic_vector(to_unsigned(16#3D#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#50#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#51#, 8)), std_logic_vector(to_unsigned(16#C8#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#52#, 8)), std_logic_vector(to_unsigned(16#96#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#53#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#54#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#55#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#5a#, 8)), std_logic_vector(to_unsigned(16#C8#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#5b#, 8)), std_logic_vector(to_unsigned(16#96#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#5c#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#d3#, 8)), std_logic_vector(to_unsigned(16#82#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#c3#, 8)), std_logic_vector(to_unsigned(16#ed#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#7f#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#da#, 8)), std_logic_vector(to_unsigned(16#08#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#e5#, 8)), std_logic_vector(to_unsigned(16#1f#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#e1#, 8)), std_logic_vector(to_unsigned(16#67#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#e0#, 8)), std_logic_vector(to_unsigned(16#00#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#dd#, 8)), std_logic_vector(to_unsigned(16#7f#, 8))),
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#05#, 8)), std_logic_vector(to_unsigned(16#00#, 8)))
+constant init_data_ov2640 : i2c_init_array := (
+	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#2c#, 8)), std_logic_vector(to_unsigned(16#ff#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#2e#, 8)), std_logic_vector(to_unsigned(16#df#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#3c#, 8)), std_logic_vector(to_unsigned(16#32#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#11#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#09#, 8)), std_logic_vector(to_unsigned(16#02#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#04#, 8)), std_logic_vector(to_unsigned(16#28#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#13#, 8)), std_logic_vector(to_unsigned(16#e5#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#14#, 8)), std_logic_vector(to_unsigned(16#48#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#2c#, 8)), std_logic_vector(to_unsigned(16#0c#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#33#, 8)), std_logic_vector(to_unsigned(16#78#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#3a#, 8)), std_logic_vector(to_unsigned(16#33#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#3b#, 8)), std_logic_vector(to_unsigned(16#fB#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#3e#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#43#, 8)), std_logic_vector(to_unsigned(16#11#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#16#, 8)), std_logic_vector(to_unsigned(16#10#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#39#, 8)), std_logic_vector(to_unsigned(16#92#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#35#, 8)), std_logic_vector(to_unsigned(16#da#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#22#, 8)), std_logic_vector(to_unsigned(16#1a#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#37#, 8)), std_logic_vector(to_unsigned(16#c3#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#23#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#34#, 8)), std_logic_vector(to_unsigned(16#c0#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#36#, 8)), std_logic_vector(to_unsigned(16#1a#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#06#, 8)), std_logic_vector(to_unsigned(16#88#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#07#, 8)), std_logic_vector(to_unsigned(16#c0#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#0d#, 8)), std_logic_vector(to_unsigned(16#87#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#0e#, 8)), std_logic_vector(to_unsigned(16#41#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#4c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#48#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#5B#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#42#, 8)), std_logic_vector(to_unsigned(16#03#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#4a#, 8)), std_logic_vector(to_unsigned(16#81#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#21#, 8)), std_logic_vector(to_unsigned(16#99#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#24#, 8)), std_logic_vector(to_unsigned(16#40#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#25#, 8)), std_logic_vector(to_unsigned(16#38#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#26#, 8)), std_logic_vector(to_unsigned(16#82#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#5c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#63#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#46#, 8)), std_logic_vector(to_unsigned(16#22#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#0c#, 8)), std_logic_vector(to_unsigned(16#3c#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#61#, 8)), std_logic_vector(to_unsigned(16#70#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#62#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7c#, 8)), std_logic_vector(to_unsigned(16#05#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#20#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#28#, 8)), std_logic_vector(to_unsigned(16#30#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#6c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#6d#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#6e#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#70#, 8)), std_logic_vector(to_unsigned(16#02#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#71#, 8)), std_logic_vector(to_unsigned(16#94#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#73#, 8)), std_logic_vector(to_unsigned(16#c1#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#40#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#17#, 8)), std_logic_vector(to_unsigned(16#11#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#18#, 8)), std_logic_vector(to_unsigned(16#43#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#19#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#1a#, 8)), std_logic_vector(to_unsigned(16#4b#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#32#, 8)), std_logic_vector(to_unsigned(16#09#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#37#, 8)), std_logic_vector(to_unsigned(16#c0#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#4f#, 8)), std_logic_vector(to_unsigned(16#ca#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#50#, 8)), std_logic_vector(to_unsigned(16#a8#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#5a#, 8)), std_logic_vector(to_unsigned(16#23#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#6d#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#3d#, 8)), std_logic_vector(to_unsigned(16#38#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#e5#, 8)), std_logic_vector(to_unsigned(16#7f#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#f9#, 8)), std_logic_vector(to_unsigned(16#c0#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#41#, 8)), std_logic_vector(to_unsigned(16#24#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#e0#, 8)), std_logic_vector(to_unsigned(16#14#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#76#, 8)), std_logic_vector(to_unsigned(16#ff#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#33#, 8)), std_logic_vector(to_unsigned(16#a0#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#42#, 8)), std_logic_vector(to_unsigned(16#20#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#43#, 8)), std_logic_vector(to_unsigned(16#18#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#4c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#87#, 8)), std_logic_vector(to_unsigned(16#d5#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#88#, 8)), std_logic_vector(to_unsigned(16#3f#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#d7#, 8)), std_logic_vector(to_unsigned(16#03#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#d9#, 8)), std_logic_vector(to_unsigned(16#10#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#d3#, 8)), std_logic_vector(to_unsigned(16#82#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c8#, 8)), std_logic_vector(to_unsigned(16#08#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c9#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7c#, 8)), std_logic_vector(to_unsigned(16#03#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#48#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#48#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7c#, 8)), std_logic_vector(to_unsigned(16#08#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#20#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#10#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7d#, 8)), std_logic_vector(to_unsigned(16#0e#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#90#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#0e#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#1a#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#31#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#5a#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#69#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#75#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#7e#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#88#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#8f#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#96#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#a3#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#af#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#c4#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#d7#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#e8#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#91#, 8)), std_logic_vector(to_unsigned(16#20#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#92#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#06#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#e3#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#05#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#05#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#04#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#93#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#96#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#08#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#19#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#02#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#0c#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#24#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#30#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#28#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#26#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#02#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#98#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#97#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c3#, 8)), std_logic_vector(to_unsigned(16#ed#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#a4#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#a8#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c5#, 8)), std_logic_vector(to_unsigned(16#11#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c6#, 8)), std_logic_vector(to_unsigned(16#51#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#bf#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c7#, 8)), std_logic_vector(to_unsigned(16#10#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b6#, 8)), std_logic_vector(to_unsigned(16#66#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b8#, 8)), std_logic_vector(to_unsigned(16#A5#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b7#, 8)), std_logic_vector(to_unsigned(16#64#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b9#, 8)), std_logic_vector(to_unsigned(16#7C#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b3#, 8)), std_logic_vector(to_unsigned(16#af#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b4#, 8)), std_logic_vector(to_unsigned(16#97#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b5#, 8)), std_logic_vector(to_unsigned(16#FF#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b0#, 8)), std_logic_vector(to_unsigned(16#C5#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b1#, 8)), std_logic_vector(to_unsigned(16#94#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#b2#, 8)), std_logic_vector(to_unsigned(16#0f#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c4#, 8)), std_logic_vector(to_unsigned(16#5c#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c0#, 8)), std_logic_vector(to_unsigned(16#64#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c1#, 8)), std_logic_vector(to_unsigned(16#4B#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#8c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#86#, 8)), std_logic_vector(to_unsigned(16#3D#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#50#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#51#, 8)), std_logic_vector(to_unsigned(16#C8#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#52#, 8)), std_logic_vector(to_unsigned(16#96#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#53#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#54#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#55#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#5a#, 8)), std_logic_vector(to_unsigned(16#C8#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#5b#, 8)), std_logic_vector(to_unsigned(16#96#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#5c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#d3#, 8)), std_logic_vector(to_unsigned(16#82#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#c3#, 8)), std_logic_vector(to_unsigned(16#ed#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#7f#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#da#, 8)), std_logic_vector(to_unsigned(16#08#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#e5#, 8)), std_logic_vector(to_unsigned(16#1f#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#e1#, 8)), std_logic_vector(to_unsigned(16#67#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#e0#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#dd#, 8)), std_logic_vector(to_unsigned(16#7f#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#05#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('0', DEV_END_MARKER, DEV_END_MARKER, 0)
 );
 
+type i2c_test_init_array is array (0 to 3) of i2c_set_t;
 
-type i2c_init_array_chk is array (0 to 3) of i2c_set_t;
-
-constant i2c_init_data_set_chk : i2c_init_array_chk := (
 -- ov2640
-	('1', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8))),
-	('0', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#0a#, 8)), "ZZZZZZZZ"),
-	('0', std_logic_vector(to_unsigned(16#30#, 7)) ,std_logic_vector(to_unsigned(16#0b#, 8)), "ZZZZZZZZ"),
-	('0', DEV_END_MARKER ,"00000000", "ZZZZZZZZ")
+-- device address: 0x30
+constant init_test_ov2640 : i2c_test_init_array := (
+	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
+	('0', std_logic_vector(to_unsigned(16#0a#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
+	('0', std_logic_vector(to_unsigned(16#0b#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
+	('0', DEV_END_MARKER, DEV_END_MARKER, 0)
+);
 
 -- ov7670
 -- ov7675
---	('1', std_logic_vector(to_unsigned(16#21#, 7)) ,std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#80#, 8))),
---	('0', std_logic_vector(to_unsigned(16#21#, 7)) ,std_logic_vector(to_unsigned(16#01#, 8)), "ZZZZZZZZ"),
---	('0', std_logic_vector(to_unsigned(16#21#, 7)) ,std_logic_vector(to_unsigned(16#09#, 8)), "ZZZZZZZZ")
+-- device address: 0x21
+constant init_test_ov767x : i2c_test_init_array := (
+	('1', std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
+	('0', std_logic_vector(to_unsigned(16#01#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
+	('0', std_logic_vector(to_unsigned(16#09#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
+	('0', DEV_END_MARKER, DEV_END_MARKER, 0)
+);
 
 
 -- 24FC256 EEPROM
---	('1', std_logic_vector(to_unsigned(16#50#, 7)) ,std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8))),
---	('0', std_logic_vector(to_unsigned(16#50#, 7)) ,std_logic_vector(to_unsigned(16#1c#, 8)), "ZZZZZZZZ"),
---	('0', std_logic_vector(to_unsigned(16#50#, 7)) ,std_logic_vector(to_unsigned(16#1d#, 8)), "ZZZZZZZZ")
+-- device address: 0x50
+constant init_test_eeprom_24fc : i2c_test_init_array := (
+	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
+	('0', std_logic_vector(to_unsigned(16#1c#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
+	('0', std_logic_vector(to_unsigned(16#1d#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
+	('0', DEV_END_MARKER, DEV_END_MARKER, 0)
 );
 
 function hex_to_7seg (
@@ -397,7 +406,7 @@ begin
 		if (rising_edge(pi_clk_50m)) then
 
 			if (fpga_rst = '1') then
-				usr_mode <= (others => '0');
+				usr_mode <= "00";
 				btn_prev := '1';
 			else
 				if (pi_btn(1) = '1' and btn_prev = '0') then
@@ -444,7 +453,9 @@ begin
 	variable clk_cnt : integer := 0;
 	--5msec delay for 50Mhz
 --	constant DELAY_5MS : integer := 250000;
-	constant DELAY_5MS : integer := 2500;
+	constant INIT_DELAY : integer := 2500;
+	variable init_data : i2c_set_t;
+	variable init_done : std_logic;
 	begin
 		if (rising_edge(pi_clk_50m)) then
 
@@ -457,39 +468,56 @@ begin
 				cm_i2c_set_value <= (others => '0');
 				clk_cnt := 0;
 				frm_cnt := 0;
+				init_done := '0';
 			else
 				if (frm_cnt = 0) then
+					-- after reset, initialize and void loop for init delay.
 					cm_i2c_ce <= '0';
 					cm_i2c_we <= '0';
 					cm_i2c_reg_addr <= (others => '0');
 					cm_i2c_set_value <= (others => '0');
+					init_done := '0';
 
-					-- after reset, delay 5ms.
-					if (clk_cnt < DELAY_5MS) then
+					if (clk_cnt < INIT_DELAY) then
 						clk_cnt := clk_cnt + 1;
 					else
 						clk_cnt := 0;
 						frm_cnt := frm_cnt + 1;
 					end if;
 
---				elsif (frm_cnt < I2C_SET_CNT + 1) then
-				elsif (frm_cnt < 3 + 1) then
+				elsif (init_done = '0') then
+					-- set data.
+					-- select data from usr_mode.
+					if (usr_mode = "00") then
+						init_data := init_data_ov2640(frm_cnt - 1);
+					elsif (usr_mode = "01") then
+						init_data := init_test_ov2640(frm_cnt - 1);
+					elsif (usr_mode = "10") then
+						init_data := init_test_ov767x(frm_cnt - 1);
+					else
+						init_data := init_test_eeprom_24fc(frm_cnt - 1);
+					end if;
+
 					if (clk_cnt = 1) then
 						cm_i2c_ce <= '1';
-						cm_i2c_we <= i2c_init_data_set_chk(frm_cnt - 1).we;
-					elsif (clk_cnt > 5000 * 4) then
+						cm_i2c_we <= init_data.we;
+					elsif (clk_cnt > I2C_EN_CNT) then
 						cm_i2c_ce <= '0';
 						cm_i2c_we <= '0';
 					end if;
 
-					cm_i2c_reg_addr <= i2c_init_data_set_chk(frm_cnt - 1).reg_addr;
-					cm_i2c_set_value <= i2c_init_data_set_chk(frm_cnt - 1).reg_value;
+					cm_i2c_reg_addr <= init_data.reg_addr;
+					cm_i2c_set_value <= init_data.reg_value;
 
-					if (clk_cnt < I2C_FRM_CNT) then
+					if (clk_cnt < init_data.delay_cnt) then
 						clk_cnt := clk_cnt + 1;
 					else
 						clk_cnt := 0;
 						frm_cnt := frm_cnt + 1;
+					end if;
+
+					if (init_data.we = '0' and init_data.reg_addr = DEV_END_MARKER and init_data.reg_value = DEV_END_MARKER) then
+						init_done := '1';
 					end if;
 				end if;
 			end if;
@@ -562,8 +590,8 @@ begin
 				if (v_cnt >= 2 + 33 and v_cnt < 2 + 33 + 480) then
 					if (h_cnt >= 96 + 48 and h_cnt < 96 + 48 + 640) then
 --						po_r <= std_logic_vector(to_unsigned(h_cnt, po_r'length));
-						po_r <= cm_i2c_read_value(7 downto 4);
-						po_g <= cm_i2c_read_value(3 downto 0);
+						po_r <= "00" & pi_cam_y(1 downto 0);
+						po_g <= pi_cam_d(7 downto 4);
 						po_b <= pi_cam_d(3 downto 0);
 						--po_b <= std_logic_vector(to_unsigned(v_cnt, po_b'length));
 					else
