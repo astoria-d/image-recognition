@@ -90,8 +90,11 @@ record
 	delay_cnt : integer;
 end record;
 
+constant INIT_DELAY : integer := 2500;
 constant I2C_FRM_CNT : integer := 6400 * 4;
 constant I2C_EN_CNT : integer := 5000 * 4;
+--5msec delay for 50Mhz
+constant DELAY_5MS : integer := 250000;
 
 constant DEV_END_MARKER : std_logic_vector(7 downto 0) := "00000000";
 
@@ -451,9 +454,6 @@ begin
 	cam_set_p : process (pi_clk_50m)
 	variable frm_cnt : integer := 0;
 	variable clk_cnt : integer := 0;
-	--5msec delay for 50Mhz
---	constant DELAY_5MS : integer := 250000;
-	constant INIT_DELAY : integer := 2500;
 	variable init_data : i2c_set_t;
 	variable init_done : std_logic;
 	begin
