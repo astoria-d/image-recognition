@@ -29,6 +29,11 @@ view signals
 add wave -label pi_clk_50m sim:/tb_cam_vga_test01/sim_board/pi_clk_50m
 add wave -label pi_rst_n sim:/tb_cam_vga_test01/sim_board/pi_rst_n
 
+add wave -divider app
+
+add wave -label usr_mode sim:/tb_cam_vga_test01/sim_board/usr_mode
+
+
 add wave -divider i2c
 
 add wave -label ce sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/ce
@@ -64,6 +69,6 @@ add wave -label po_cam_xvclk sim:/tb_cam_vga_test01/sim_board/po_cam_xvclk
 run 1500us
 wave zoom full
 
-#run 1500us
+run 1500us
 
 

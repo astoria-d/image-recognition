@@ -98,9 +98,12 @@ constant DELAY_5MS : integer := 250000;
 
 constant DEV_END_MARKER : std_logic_vector(7 downto 0) := "00000000";
 
-type i2c_init_array is array (0 to 175) of i2c_set_t;
+type i2c_init_array is array (0 to 177) of i2c_set_t;
 
+-- usr_mode = "00"
 constant init_data_ov2640 : i2c_init_array := (
+	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), DELAY_5MS),
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#2c#, 8)), std_logic_vector(to_unsigned(16#ff#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#2e#, 8)), std_logic_vector(to_unsigned(16#df#, 8)), I2C_FRM_CNT),
@@ -283,6 +286,7 @@ type i2c_test_init_array is array (0 to 3) of i2c_set_t;
 
 -- ov2640
 -- device address: 0x30
+-- usr_mode = "01"
 constant init_test_ov2640 : i2c_test_init_array := (
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
 	('0', std_logic_vector(to_unsigned(16#0a#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
@@ -293,6 +297,7 @@ constant init_test_ov2640 : i2c_test_init_array := (
 -- ov7670
 -- ov7675
 -- device address: 0x21
+-- usr_mode = "10"
 constant init_test_ov767x : i2c_test_init_array := (
 	('1', std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
 	('0', std_logic_vector(to_unsigned(16#01#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
@@ -303,6 +308,7 @@ constant init_test_ov767x : i2c_test_init_array := (
 
 -- 24FC256 EEPROM
 -- device address: 0x50
+-- usr_mode = "11"
 constant init_test_eeprom_24fc : i2c_test_init_array := (
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
 	('0', std_logic_vector(to_unsigned(16#1c#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
@@ -378,6 +384,9 @@ signal fpga_rst 				: std_logic;
 signal usr_rst 				: std_logic;
 signal tmp_cam_clk 			: std_logic;
 signal pll_locked 			: std_logic;
+
+signal jtag_i2c_clk			: std_logic;
+signal jtag_cam_clk			: std_logic;
 
 signal usr_mode 				: unsigned(1 downto 0) := "00";
 
@@ -608,15 +617,21 @@ begin
 		end if;
 	end process;
 
-	-- jtag clock
+	-- input clock is 50mhz
+	-- i2c jtag clock is 1/512 of 50mhz
+	-- cam jtag clock is 1/2 of 50mhz
 	jtag_clk_p : process (pi_clk_50m)
 	variable div : unsigned (7 downto 0) := "00000000";
 	begin
 		if (rising_edge(pi_clk_50m)) then
 			div := div + 1;
-			jtag_clk <= div(5);
+			jtag_i2c_clk <= div(5);
+			jtag_cam_clk <= div(0);
 		end if;
 	end process;
+
+--	jtag_clk <= jtag_i2c_clk;
+	jtag_clk <= jtag_cam_clk;
 
 
 end rtl;

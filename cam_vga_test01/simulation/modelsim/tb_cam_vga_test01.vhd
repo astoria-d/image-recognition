@@ -136,5 +136,21 @@ begin
 		wait for base_clock_time / 2;
 	end process;
 
+
+	--- input switch
+	mode_set_p: process
+	begin
+		btn_input(1) <= '1';
+		wait for powerup_time;
+		wait for reset_time * 2;
+
+		btn_input(1) <= '0';
+		wait for reset_time;
+		btn_input(1) <= '1';
+
+		wait;
+	end process;
+
+
 end stimulus;
 

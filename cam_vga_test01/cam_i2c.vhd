@@ -41,9 +41,9 @@ signal out_cnt : unsigned (4 downto 0) := "00001";
 
 begin
 
-	-- input clock is 50mhz
-	-- i2c clock is 100khz
-	-- the state transition must be 1/64 of input clock.
+	-- input clock is 50mhz (20ns)
+	-- i2c clock is max 400khz (2.5us)
+	-- i2c_clk_div is 1/256 of pi_clk_50m
 	div64_p : process (pi_clk_50m)
 	begin
 		if (rising_edge(pi_clk_50m)) then
@@ -116,6 +116,7 @@ begin
 		end if;
 	end process;
 
+	-- out_cnt is 1/512 of pi_clk_50m
 	i2c_cnt_p : process (pi_clk_50m)
 	begin
 		if (rising_edge(pi_clk_50m)) then
@@ -141,6 +142,7 @@ begin
 		end if;
 	end process;
 
+	-- scl is 1/512 of pi_clk_50m (97.6KHz)
 	i2c_clk_p : process (pi_clk_50m)
 	variable stopped : std_logic;
 	begin
