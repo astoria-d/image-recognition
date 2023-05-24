@@ -33,35 +33,45 @@ add wave -divider app
 
 add wave -label usr_mode sim:/tb_cam_vga_test01/sim_board/usr_mode
 
+#set show_i2c true
+set show_i2c false
 
-add wave -divider i2c
+if $show_i2c {
+	add wave -divider i2c
 
-add wave -label ce sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/ce
-add wave -label we sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/we
+	add wave -label ce sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/ce
+	add wave -label we sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/we
 
-add wave -label out_cnt -radix unsigned     sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/out_cnt
+	add wave -label out_cnt -radix unsigned     sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/out_cnt
 
-add wave -label out_cnt_3_1 -radix unsigned  {sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/out_cnt(3 downto 1)}
+	add wave -label out_cnt_3_1 -radix unsigned  {sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/out_cnt(3 downto 1)}
 
-add wave -label cur_state sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/cur_state
-#add wave -label next_state sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/next_state
+	add wave -label cur_state sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/cur_state
+	#add wave -label next_state sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/next_state
 
-add wave -label dev_addr -radix hex    sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/dev_addr
-add wave -label reg_addr -radix hex    sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/reg_addr
-add wave -label set_reg -radix hex   sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/set_reg
-add wave -label read_reg -radix hex   sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/read_reg
-
-
-
-add wave -label i2c_clk_div -radix unsigned     sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/i2c_clk_div
-add wave -label i2c_clk_div -radix binary       sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/i2c_clk_div
+	add wave -label dev_addr -radix hex    sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/dev_addr
+	add wave -label reg_addr -radix hex    sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/reg_addr
+	add wave -label set_reg -radix hex   sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/set_reg
+	add wave -label read_reg -radix hex   sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/read_reg
 
 
-add wave -label scl sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/scl
-add wave -label sda sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/sda
+
+	add wave -label i2c_clk_div -radix unsigned     sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/i2c_clk_div
+	add wave -label i2c_clk_div -radix binary       sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/i2c_clk_div
+
+
+	add wave -label scl sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/scl
+	add wave -label sda sim:/tb_cam_vga_test01/sim_board/cm_i2c_inst/sda
+}
 
 add wave -divider pll
 add wave -label po_cam_xvclk sim:/tb_cam_vga_test01/sim_board/po_cam_xvclk
+
+add wave -divider cam
+add wave -label pi_cam_pclk sim:/tb_cam_vga_test01/sim_board/pi_cam_pclk
+
+add wave -label pi_cam_vsync sim:/tb_cam_vga_test01/sim_board/pi_cam_vsync
+add wave -label pi_cam_href sim:/tb_cam_vga_test01/sim_board/pi_cam_href
 
 
 #run 1us

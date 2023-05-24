@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.std_logic_arith.all;
+use ieee.numeric_std.all;
 
 entity tb_cam_vga_test01 is
 end tb_cam_vga_test01;
@@ -69,7 +69,7 @@ signal cam_scl			: std_logic;
 signal cam_sda			: std_logic;
 signal cam_href			: std_logic;
 signal cam_vsync		: std_logic;
-signal cam_xvclk			: std_logic;
+signal cam_xvclk		: std_logic;
 signal cam_pclk			: std_logic;
 signal cam_y			: std_logic_vector(1 downto 0);
 signal cam_d			: std_logic_vector(7 downto 0);
@@ -97,6 +97,12 @@ constant sw_input		: std_logic_vector(6 downto 0) := "0110000";
 
 --DE1 base clock = 50 MHz
 constant base_clock_time : time := 20 ns;
+
+-- OV2640 pixcel clock = 36 MHz
+constant pclock_time  : time := 27.78 ns;
+
+constant tp : time := pclock_time;
+constant tline : time := 1922 * tp;
 
 begin
 
@@ -151,6 +157,45 @@ begin
 		wait;
 	end process;
 
+	-- generate pclk.
+	pclock_p: process
+	begin
+		cam_pclk <= '1';
+		wait for pclock_time / 2;
+		cam_pclk <= '0';
+		wait for pclock_time / 2;
+	end process;
+
+	-- vsync
+	cam_vsync_p: process
+	begin
+		cam_vsync <= '1';
+		wait for 4 * tline;
+		cam_vsync <= '0';
+		wait for 1244 * tline;
+	end process;
+
+	-- href
+	cam_href_p: process
+	variable cnt : integer := 0;
+	begin
+		if (cnt = 0) then
+			cam_href <= '0';
+			wait for 4 * tline + 27193 * tp;
+			cnt := cnt + 1;
+		else
+			cam_href <= '1';
+			wait for 1600 * tp;
+			cam_href <= '0';
+			wait for 322 * tp;
+			cam_href <= '1';
+			if (cnt < 1200) then
+				cnt := cnt + 1;
+			else
+				cnt := 0;
+			end if;
+		end if;
+	end process;
 
 end stimulus;
 
