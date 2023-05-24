@@ -67,12 +67,20 @@ if $show_i2c {
 add wave -divider pll
 add wave -label po_cam_xvclk sim:/tb_cam_vga_test01/sim_board/po_cam_xvclk
 
-add wave -divider cam
+add wave -divider "dummy camera device"
 add wave -label pi_cam_pclk sim:/tb_cam_vga_test01/sim_board/pi_cam_pclk
+
+add wave -label pcnt sim:/tb_cam_vga_test01/pcnt
+add wave -label hcnt sim:/tb_cam_vga_test01/hcnt
+add wave -label vcnt sim:/tb_cam_vga_test01/vcnt
+
 
 add wave -label pi_cam_vsync sim:/tb_cam_vga_test01/sim_board/pi_cam_vsync
 add wave -label pi_cam_href sim:/tb_cam_vga_test01/sim_board/pi_cam_href
+add wave -label pi_cam_d -radix unsigned   sim:/tb_cam_vga_test01/sim_board/pi_cam_d
 
+
+add wave -divider "camera module"
 
 #run 1us
 
@@ -80,6 +88,7 @@ run 1500us
 wave zoom full
 
 #run 1500us
-run 100ms
+
+#run 100ms
 
 

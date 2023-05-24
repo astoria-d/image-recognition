@@ -88,7 +88,6 @@ signal svn_seg5			: std_logic_vector(6 downto 0);
 
 signal jtag_clk			: std_logic;
 
-
 constant powerup_time   : time := 2 us;
 constant reset_time     : time := 890 ns;
 
@@ -101,8 +100,13 @@ constant base_clock_time : time := 20 ns;
 -- OV2640 pixcel clock = 36 MHz
 constant pclock_time  : time := 27.78 ns;
 
-constant tp : time := pclock_time;
-constant tline : time := 1922 * tp;
+constant pline : integer := 1922;
+constant vlines : integer := 1248;
+constant pframe : integer := vlines * pline;
+
+signal pcnt	: integer := 0;
+signal hcnt	: integer := 0;
+signal vcnt	: integer := 0;
 
 begin
 
@@ -166,38 +170,56 @@ begin
 		wait for pclock_time / 2;
 	end process;
 
-	-- vsync
-	cam_vsync_p: process
+	-- counter
+	cam_cnt_p: process
 	begin
-		cam_vsync <= '1';
-		wait for 4 * tline;
-		cam_vsync <= '0';
-		wait for 1244 * tline;
-	end process;
-
-	-- href
-	cam_href_p: process
-	variable pcnt : integer := 0;
-	variable vcnt : integer := 0;
-	begin
-		if (pcnt = 0) then
-			cam_href <= '0';
-			wait for 4 * tline + 27193 * tp;
-			pcnt := pcnt + 1;
+		wait until falling_edge(cam_pclk);
+		-- pcnt
+		if (pcnt < pframe - 1) then
+			pcnt <= pcnt + 1;
 		else
-			if (pcnt < 1200) then
-				cam_href <= '1';
-				wait for 1600 * tp;
-				cam_href <= '0';
-				wait for 322 * tp;
-				cam_href <= '1';
-				pcnt := pcnt + 1;
+			pcnt <= 0;
+		end if;
+
+		-- vsync
+		if (pcnt < 4 * pline - 1) then
+			cam_vsync <= '1';
+		else
+			cam_vsync <= '0';
+		end if;
+
+		-- hcnt, vcnt and href
+		if (pcnt < 4 * pline + 27193 - 1 or pcnt > pframe - 57697 - 1) then
+			cam_href <= '0';
+			hcnt <= 0;
+			vcnt <= 0;
+		else
+			if (hcnt < 1600 + 322 - 1) then
+				if (hcnt < 1600 - 1) then
+					cam_href <= '1';
+				else
+					cam_href <= '0';
+				end if;
+				hcnt <= hcnt + 1;
 			else
+				if (vcnt < 1200 - 1) then
+					vcnt <= vcnt + 1;
+				else
+					vcnt <= 0;
+				end if;
 				cam_href <= '0';
-				wait for 57697 * tp;
-				pcnt := 0;
+				hcnt <= 0;
 			end if;
 		end if;
+	end process;
+
+	-- pixcel data
+	cam_pix_p: process
+	variable dmy : unsigned(7 downto 0) := "00000000";
+	begin
+		wait until falling_edge(cam_pclk);
+		cam_d <= std_logic_vector(dmy);
+		dmy := dmy + 1;
 	end process;
 
 end stimulus;
