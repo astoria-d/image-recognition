@@ -79,6 +79,7 @@ add wave -label pi_cam_href sim:/tb_cam_vga_test01/sim_board/pi_cam_href
 run 1500us
 wave zoom full
 
-run 1500us
+#run 1500us
+run 100ms
 
 

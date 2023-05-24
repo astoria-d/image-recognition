@@ -177,22 +177,25 @@ begin
 
 	-- href
 	cam_href_p: process
-	variable cnt : integer := 0;
+	variable pcnt : integer := 0;
+	variable vcnt : integer := 0;
 	begin
-		if (cnt = 0) then
+		if (pcnt = 0) then
 			cam_href <= '0';
 			wait for 4 * tline + 27193 * tp;
-			cnt := cnt + 1;
+			pcnt := pcnt + 1;
 		else
-			cam_href <= '1';
-			wait for 1600 * tp;
-			cam_href <= '0';
-			wait for 322 * tp;
-			cam_href <= '1';
-			if (cnt < 1200) then
-				cnt := cnt + 1;
+			if (pcnt < 1200) then
+				cam_href <= '1';
+				wait for 1600 * tp;
+				cam_href <= '0';
+				wait for 322 * tp;
+				cam_href <= '1';
+				pcnt := pcnt + 1;
 			else
-				cnt := 0;
+				cam_href <= '0';
+				wait for 57697 * tp;
+				pcnt := 0;
 			end if;
 		end if;
 	end process;
