@@ -54,6 +54,15 @@ end cam_vga_test01;
 
 architecture rtl of cam_vga_test01 is
 
+component PLL
+	port (
+		refclk   : in  std_logic := '0'; --  refclk.clk
+		rst      : in  std_logic := '0'; --   reset.reset
+		outclk_0 : out std_logic;        -- outclk0.clk
+		locked   : out std_logic         --  locked.export
+	);
+end component;
+
 component cam_i2c
 	port (
 		-- input clock 50 mhz
@@ -73,14 +82,32 @@ component cam_i2c
 	);
 end component;
 
-component PLL
+component cam_vga
 	port (
-		refclk   : in  std_logic := '0'; --  refclk.clk
-		rst      : in  std_logic := '0'; --   reset.reset
-		outclk_0 : out std_logic;        -- outclk0.clk
-		locked   : out std_logic         --  locked.export
+		-- input clock 50 mhz
+		pi_clk_50m,
+
+		-- camera 36 mhz
+		pi_cam_pclk 	: in std_logic;
+
+		-- user reset signal
+		usr_rst 			: std_logic;
+
+		-- camera data interface
+		pi_cam_href		: in std_logic;
+		pi_cam_vsync	: in std_logic;
+		pi_cam_y			: in std_logic_vector(1 downto 0);
+		pi_cam_d			: in std_logic_vector(7 downto 0);
+
+		-- vga output
+		po_h_sync_n		: out std_logic;
+		po_v_sync_n		: out std_logic;
+		po_r				: out std_logic_vector(3 downto 0);
+		po_g				: out std_logic_vector(3 downto 0);
+		po_b				: out std_logic_vector(3 downto 0)
 	);
 end component;
+
 
 type i2c_set_t is
 record
@@ -377,9 +404,6 @@ begin
 	return hex_to_7seg(indata_v);
 end hex_to_7seg;
 
-signal h_cnt 					: integer range 0 to 800 - 1 := 0;
-signal v_cnt 					: integer range 0 to 540 - 1 := 0;
-
 signal cm_i2c_ce				: std_logic;
 signal cm_i2c_we				: std_logic;
 signal cm_i2c_dev_addr		: std_logic_vector(6 downto 0) := "0000000";
@@ -389,7 +413,6 @@ signal cm_i2c_read_value	: std_logic_vector(7 downto 0);
 
 signal fpga_rst 				: std_logic;
 signal usr_rst 				: std_logic;
-signal tmp_cam_clk 			: std_logic;
 signal pll_locked 			: std_logic;
 
 signal jtag_i2c_clk			: std_logic;
@@ -403,20 +426,54 @@ begin
 	usr_rst <= not pi_btn(0);
 	po_cam_rst <= '1';
 	po_cam_pwdn <= '0';
-	po_cam_xvclk <= tmp_cam_clk;
-
-	-- i2c encoder
-	cm_i2c_inst : cam_i2c port map (
-		pi_clk_50m,
-		cm_i2c_ce, cm_i2c_we, cm_i2c_dev_addr, cm_i2c_reg_addr, cm_i2c_set_value, cm_i2c_read_value, 
-		po_cam_scl, pio_cam_sda);
 
 	-- PLL 24 MHz for ov2640 system clock
 	pll_inst : PLL port map (
 		pi_clk_50m,
 		fpga_rst,
-		tmp_cam_clk,
+		po_cam_xvclk,
 		pll_locked);
+
+	-- i2c encoder
+	cm_i2c_inst : cam_i2c port map (
+		-- input clock 50 mhz
+		pi_clk_50m,
+
+		-- camera data interface
+		cm_i2c_ce,
+		cm_i2c_we,
+		cm_i2c_dev_addr,
+		cm_i2c_reg_addr,
+		cm_i2c_set_value,
+		cm_i2c_read_value, 
+
+		-- output i2c interface
+		po_cam_scl,
+		pio_cam_sda);
+
+	cm_vga_inst : cam_vga port map (
+		-- input clock 50 mhz
+		pi_clk_50m,
+
+		-- camera 36 mhz
+		pi_cam_pclk,
+
+		-- user reset signal
+		usr_rst,
+
+		-- camera data interface
+		pi_cam_href,
+		pi_cam_vsync,
+		pi_cam_y,
+		pi_cam_d,
+
+		-- vga output
+		po_h_sync_n,
+		po_v_sync_n,
+		po_r,
+		po_g,
+		po_b
+	);
 
 	-- i2c device address mode
 	mode_p : process (pi_clk_50m)
@@ -535,90 +592,6 @@ begin
 					if (init_data.we = '0' and init_data.reg_addr = DEV_END_MARKER and init_data.reg_value = DEV_END_MARKER) then
 						init_done := '1';
 					end if;
-				end if;
-			end if;
-		end if;
-	end process;
-
-	-- vga output
-	vga_cnt_p : process (pi_clk_50m)
-	variable div_25 : std_logic := '0';
-	begin
-		if (rising_edge(pi_clk_50m)) then
-			if (usr_rst = '1') then
-				h_cnt <= 0;
-				v_cnt <= 0;
-				div_25 := '0';
-			else
-				-- input clock is 50mhz
-				-- vga 640 x 480 pixel rate is 25mhz
-				-- divide half
-				div_25 := not div_25;
-				if (div_25 = '1') then
---					if (h_cnt = h_cnt'high) then
---modelsim fails with 'high
-					if (h_cnt = 800 - 1) then
-						h_cnt <= 0;
---						if (v_cnt = v_cnt'high) then
-						if (v_cnt = 540 - 1) then
-							v_cnt <= 0;
-						else
-							v_cnt <= v_cnt + 1;
-						end if;
-					else
-						h_cnt <= h_cnt + 1;
-					end if;
-				end if;
-			end if;
-		end if;
-	end process;
-
-	vga_sync_p : process (pi_clk_50m)
-	begin
-		if (rising_edge(pi_clk_50m)) then
-			if (usr_rst = '1') then
-				po_h_sync_n <= '0';
-				po_v_sync_n <= '0';
-			else
-				if (h_cnt < 96) then
-					po_h_sync_n <= '0';
-				else
-					po_h_sync_n <= '1';
-				end if;
-
-				if (v_cnt < 2) then
-					po_v_sync_n <= '0';
-				else
-					po_v_sync_n <= '1';
-				end if;
-			end if;
-		end if;
-	end process;
-
-	vga_out_p : process (pi_clk_50m)
-	begin
-		if (rising_edge(pi_clk_50m)) then
-			if (usr_rst = '1') then
-				po_r <= (others => '0');
-				po_g <= (others => '0');
-				po_b <= (others => '0');
-			else
-				if (v_cnt >= 2 + 33 and v_cnt < 2 + 33 + 480) then
-					if (h_cnt >= 96 + 48 and h_cnt < 96 + 48 + 640) then
---						po_r <= std_logic_vector(to_unsigned(h_cnt, po_r'length));
-						po_r <= "00" & pi_cam_y(1 downto 0);
-						po_g <= pi_cam_d(7 downto 4);
-						po_b <= pi_cam_d(3 downto 0);
-						--po_b <= std_logic_vector(to_unsigned(v_cnt, po_b'length));
-					else
-						po_r <= (others => '0');
-						po_g <= (others => '0');
-						po_b <= (others => '0');
-					end if;
-				else
-					po_r <= (others => '0');
-					po_g <= (others => '0');
-					po_b <= (others => '0');
 				end if;
 			end if;
 		end if;

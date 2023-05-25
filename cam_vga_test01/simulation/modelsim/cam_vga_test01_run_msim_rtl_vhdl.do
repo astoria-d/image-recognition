@@ -14,10 +14,11 @@ vmap work rtl_work
 ###### MIF file copy and HDL compilation commands for IPUTF cores 
 
 
-vcom "E:/daisuke/image-recognision/repo/cam_vga_test01/PLL_sim/PLL.vho"
+vcom "../../PLL_sim/PLL.vho"
 
-vcom -93 -work work {E:/daisuke/image-recognision/repo/cam_vga_test01/cam_vga_test01.vhd}
-vcom -93 -work work {E:/daisuke/image-recognision/repo/cam_vga_test01/cam_i2c.vhd}
+vcom -93 -work work {../../cam_i2c.vhd}
+vcom -93 -work work {../../cam_vga.vhd}
+vcom -93 -work work {../../cam_vga_test01.vhd}
 
 vcom -93 -work work {E:/daisuke/image-recognision/repo/cam_vga_test01/simulation/modelsim/tb_cam_vga_test01.vhd}
 
@@ -81,6 +82,19 @@ add wave -label pi_cam_d -radix unsigned   sim:/tb_cam_vga_test01/sim_board/pi_c
 
 
 add wave -divider "camera module"
+
+add wave -label cm_h_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_h_cnt
+add wave -label cm_v_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_v_cnt
+
+
+add wave -label vga_h_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/vga_h_cnt
+add wave -label vga_v_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/vga_v_cnt
+
+add wave -label po_h_sync_n sim:/tb_cam_vga_test01/sim_board/po_h_sync_n
+add wave -label po_v_sync_n sim:/tb_cam_vga_test01/sim_board/po_v_sync_n
+
+
+
 
 #run 1us
 

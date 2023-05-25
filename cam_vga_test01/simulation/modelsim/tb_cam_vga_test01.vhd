@@ -171,55 +171,57 @@ begin
 	end process;
 
 	-- counter
-	cam_cnt_p: process
+	cam_cnt_p: process (cam_pclk)
 	begin
-		wait until falling_edge(cam_pclk);
-		-- pcnt
-		if (pcnt < pframe - 1) then
-			pcnt <= pcnt + 1;
-		else
-			pcnt <= 0;
-		end if;
-
-		-- vsync
-		if (pcnt < 4 * pline - 1) then
-			cam_vsync <= '1';
-		else
-			cam_vsync <= '0';
-		end if;
-
-		-- hcnt, vcnt and href
-		if (pcnt < 4 * pline + 27193 - 1 or pcnt > pframe - 57697 - 1) then
-			cam_href <= '0';
-			hcnt <= 0;
-			vcnt <= 0;
-		else
-			if (hcnt < 1600 + 322 - 1) then
-				if (hcnt < 1600 - 1) then
-					cam_href <= '1';
-				else
-					cam_href <= '0';
-				end if;
-				hcnt <= hcnt + 1;
+		if (falling_edge(cam_pclk)) then
+			-- pcnt
+			if (pcnt < pframe - 1) then
+				pcnt <= pcnt + 1;
 			else
-				if (vcnt < 1200 - 1) then
-					vcnt <= vcnt + 1;
-				else
-					vcnt <= 0;
-				end if;
+				pcnt <= 0;
+			end if;
+
+			-- vsync
+			if (pcnt < 4 * pline - 1) then
+				cam_vsync <= '1';
+			else
+				cam_vsync <= '0';
+			end if;
+
+			-- hcnt, vcnt and href
+			if (pcnt < 4 * pline + 27193 - 1 or pcnt > pframe - 57697 - 1) then
 				cam_href <= '0';
 				hcnt <= 0;
+				vcnt <= 0;
+			else
+				if (hcnt < 1600 + 322 - 1) then
+					if (hcnt < 1600 - 1) then
+						cam_href <= '1';
+					else
+						cam_href <= '0';
+					end if;
+					hcnt <= hcnt + 1;
+				else
+					if (vcnt < 1200 - 1) then
+						vcnt <= vcnt + 1;
+					else
+						vcnt <= 0;
+					end if;
+					cam_href <= '0';
+					hcnt <= 0;
+				end if;
 			end if;
 		end if;
 	end process;
 
 	-- pixcel data
-	cam_pix_p: process
+	cam_pix_p: process (cam_pclk)
 	variable dmy : unsigned(7 downto 0) := "00000000";
 	begin
-		wait until falling_edge(cam_pclk);
-		cam_d <= std_logic_vector(dmy);
-		dmy := dmy + 1;
+		if (falling_edge(cam_pclk)) then
+			cam_d <= std_logic_vector(dmy);
+			dmy := dmy + 1;
+		end if;
 	end process;
 
 end stimulus;
