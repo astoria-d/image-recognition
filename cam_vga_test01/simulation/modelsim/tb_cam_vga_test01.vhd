@@ -182,10 +182,12 @@ begin
 			end if;
 
 			-- vsync
+			-- it looks like spec is opposite.
+			-- vsync is active high?
 			if (pcnt < 4 * pline - 1) then
-				cam_vsync <= '1';
-			else
 				cam_vsync <= '0';
+			else
+				cam_vsync <= '1';
 			end if;
 
 			-- hcnt, vcnt and href

@@ -312,6 +312,7 @@ constant init_data_ov2640 : i2c_init_array := (
 	('1', std_logic_vector(to_unsigned(16#e1#, 8)), std_logic_vector(to_unsigned(16#67#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#e0#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#dd#, 8)), std_logic_vector(to_unsigned(16#7f#, 8)), I2C_FRM_CNT),
+	-- R_BYPASS, 0: DSP
 	('1', std_logic_vector(to_unsigned(16#05#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
 	('0', DEV_END_MARKER, DEV_END_MARKER, 0)
 );
@@ -606,7 +607,8 @@ begin
 		if (rising_edge(pi_clk_50m)) then
 			div := div + 1;
 			jtag_i2c_clk <= div(5);
-			jtag_cam_clk <= div(0);
+--			jtag_cam_clk <= div(0);
+			jtag_cam_clk <= div(4);
 		end if;
 	end process;
 

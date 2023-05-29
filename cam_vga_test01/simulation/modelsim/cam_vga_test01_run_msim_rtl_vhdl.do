@@ -29,6 +29,7 @@ view signals
 
 add wave -label pi_clk_50m sim:/tb_cam_vga_test01/sim_board/pi_clk_50m
 add wave -label pi_rst_n sim:/tb_cam_vga_test01/sim_board/pi_rst_n
+add wave -label jtag_clk sim:/tb_cam_vga_test01/sim_board/jtag_clk
 
 add wave -divider app
 
@@ -81,8 +82,13 @@ add wave -label pi_cam_href sim:/tb_cam_vga_test01/sim_board/pi_cam_href
 add wave -label pi_cam_d -radix unsigned   sim:/tb_cam_vga_test01/sim_board/pi_cam_d
 
 
+add wave -divider "==="
+add wave -divider "==="
+add wave -divider "==="
 add wave -divider "camera module"
 
+add wave -label pi_cam_href sim:/tb_cam_vga_test01/sim_board/pi_cam_href
+add wave -label pi_cam_vsync sim:/tb_cam_vga_test01/sim_board/pi_cam_vsync
 add wave -label cm_h_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_h_cnt
 add wave -label cm_v_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_v_cnt
 
@@ -94,6 +100,9 @@ add wave -label po_h_sync_n sim:/tb_cam_vga_test01/sim_board/po_h_sync_n
 add wave -label po_v_sync_n sim:/tb_cam_vga_test01/sim_board/po_v_sync_n
 
 
+add wave -label po_r -radix unsigned   sim:/tb_cam_vga_test01/sim_board/po_r
+add wave -label po_g -radix unsigned   sim:/tb_cam_vga_test01/sim_board/po_g
+add wave -label po_b -radix unsigned   sim:/tb_cam_vga_test01/sim_board/po_b
 
 
 #run 1us
