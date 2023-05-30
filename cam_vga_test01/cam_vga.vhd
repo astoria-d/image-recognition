@@ -35,8 +35,9 @@ signal vga_v_cnt 			: integer range 0 to 540 - 1 := 0;
 signal cm_h_cnt 		: integer range 0 to 1922 - 1 := 0;
 signal cm_v_cnt 		: integer range 0 to 1248 - 1 := 0;
 
+--	RGB565
 signal cm_r				: std_logic_vector(4 downto 0);
-signal cm_g				: std_logic_vector(4 downto 0);
+signal cm_g				: std_logic_vector(5 downto 0);
 signal cm_b				: std_logic_vector(4 downto 0);
 
 
@@ -54,19 +55,28 @@ begin
 				if (pi_cam_href = '0') then
 					cm_h_cnt <= 0;
 				elsif (cm_h_cnt < 1922 - 1) then
-					if (to_unsigned(cm_v_cnt, 10)(0) = '0') then
 						if (to_unsigned(cm_h_cnt, 10)(0) = '0') then
-							cm_b <= pi_cam_d(7 downto 3);
+							cm_b <= pi_cam_d(4 downto 0);
+							cm_g(2 downto 0) <= pi_cam_d(7 downto 5);
 						else
-							cm_g <= pi_cam_d(7 downto 3);
-						end if;
-					else
-						if (to_unsigned(cm_h_cnt, 10)(0) = '0') then
-							cm_g <= pi_cam_d(7 downto 3);
-						else
+							cm_g(5 downto 3) <= pi_cam_d(2 downto 0);
 							cm_r <= pi_cam_d(7 downto 3);
 						end if;
-					end if;
+
+--					if (to_unsigned(cm_v_cnt, 10)(0) = '0') then
+--						if (to_unsigned(cm_h_cnt, 10)(0) = '0') then
+--							cm_b <= pi_cam_d(4 downto 0);
+--							cm_g(2 downto 0) <= pi_cam_d(7 downto 5);
+--						else
+--							cm_g <= pi_cam_d(7 downto 2);
+--						end if;
+--					else
+--						if (to_unsigned(cm_h_cnt, 10)(0) = '0') then
+--							cm_g <= pi_cam_d(7 downto 2);
+--						else
+--							cm_r <= pi_cam_d(7 downto 3);
+--						end if;
+--					end if;
 					cm_h_cnt <= cm_h_cnt + 1;
 				end if;
 			end if;
@@ -163,7 +173,7 @@ begin
 --						po_b <= pi_cam_d(3 downto 0);
 
 						po_r <= cm_r(4 downto 1);
-						po_g <= cm_g(4 downto 1);
+						po_g <= cm_g(5 downto 2);
 						po_b <= cm_b(4 downto 1);
 					else
 						po_r <= (others => '0');

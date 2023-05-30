@@ -92,6 +92,10 @@ add wave -label pi_cam_vsync sim:/tb_cam_vga_test01/sim_board/pi_cam_vsync
 add wave -label cm_h_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_h_cnt
 add wave -label cm_v_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_v_cnt
 
+add wave -label cm_r -radix hex sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_r
+add wave -label cm_g -radix hex sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_g
+add wave -label cm_b -radix hex sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/cm_b
+
 
 add wave -label vga_h_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/vga_h_cnt
 add wave -label vga_v_cnt -radix unsigned   sim:/tb_cam_vga_test01/sim_board/cm_vga_inst/vga_v_cnt

@@ -307,6 +307,7 @@ constant init_data_ov2640 : i2c_init_array := (
 	('1', std_logic_vector(to_unsigned(16#d3#, 8)), std_logic_vector(to_unsigned(16#82#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#c3#, 8)), std_logic_vector(to_unsigned(16#ed#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#7f#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	-- IMAGE_MODE RGB565
 	('1', std_logic_vector(to_unsigned(16#da#, 8)), std_logic_vector(to_unsigned(16#08#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#e5#, 8)), std_logic_vector(to_unsigned(16#1f#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#e1#, 8)), std_logic_vector(to_unsigned(16#67#, 8)), I2C_FRM_CNT),
@@ -613,7 +614,8 @@ begin
 	end process;
 
 --	jtag_clk <= jtag_i2c_clk;
-	jtag_clk <= jtag_cam_clk;
+--	jtag_clk <= jtag_cam_clk;
+	jtag_clk <= pi_clk_50m;
 
 
 end rtl;
