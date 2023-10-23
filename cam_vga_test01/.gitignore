@@ -63,6 +63,7 @@ output_files/*
 *.vpp
 *.log
 *.rpt
+*.qws
 *_dump.txt
 
 
@@ -75,3 +76,4 @@ simulation/modelsim/transcript
 simulation/modelsim/*.wlf
 simulation/modelsim/*.cr.mti
 simulation/modelsim/*.xrf
+

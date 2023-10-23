@@ -1,0 +1,8 @@
+*.vho
+wlft*
+*.vstf
+rtl_work
+_info
+*.wlf
+*.cr.mti
+transcript
