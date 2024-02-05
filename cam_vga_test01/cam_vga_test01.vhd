@@ -384,8 +384,12 @@ signal jtag_cam_clk			: std_logic;
 begin
 
 	fpga_rst <= not pi_rst_n;
+
+	-- user reset btn-0
 	usr_rst <= not pi_btn(0);
+	-- camera reset, btn-2
 	po_cam_rst <= pi_btn(2);
+	-- power down is fixed 0
 	po_cam_pwdn <= '0';
 
 	-- PLL 24 MHz for ov2640 system clock
