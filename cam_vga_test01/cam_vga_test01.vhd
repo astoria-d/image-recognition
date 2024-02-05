@@ -688,23 +688,23 @@ begin
 --		po_b
 --	);
 
-	-- i2c device address mode
-	mode_p : process (pi_clk_50m)
-	variable btn_prev : std_logic;
-	begin
-		if (rising_edge(pi_clk_50m)) then
-
-			if (fpga_rst = '1') then
-				usr_mode <= "00";
-				btn_prev := '1';
-			else
-				if (pi_btn(1) = '1' and btn_prev = '0') then
-					usr_mode <= usr_mode + 1;
-				end if;
-				btn_prev := pi_btn(1);
-			end if;
-		end if;
-	end process;
+--	-- i2c device address mode
+--	mode_p : process (pi_clk_50m)
+--	variable btn_prev : std_logic;
+--	begin
+--		if (rising_edge(pi_clk_50m)) then
+--
+--			if (fpga_rst = '1') then
+--				usr_mode <= "00";
+--				btn_prev := '1';
+--			else
+--				if (pi_btn(1) = '1' and btn_prev = '0') then
+--					usr_mode <= usr_mode + 1;
+--				end if;
+--				btn_prev := pi_btn(1);
+--			end if;
+--		end if;
+--	end process;
 
 	-- 7 segment display
 	svn_umode_seg_p : process (pi_clk_50m)
