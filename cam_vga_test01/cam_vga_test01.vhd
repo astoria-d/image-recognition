@@ -137,8 +137,8 @@ type i2c_init_array is array (0 to 198) of i2c_set_t;
 
 -- usr_mode = "00"
 constant init_data_ov2640 : i2c_init_array := (
-	('0', std_logic_vector(to_unsigned(16#0a#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
-	('0', std_logic_vector(to_unsigned(16#0b#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
+	('0', std_logic_vector(to_unsigned(16#0a#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),  -- read PID low, read value: 0x26
+	('0', std_logic_vector(to_unsigned(16#0b#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),  -- read PID high, read value: 0x42
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
@@ -637,7 +637,7 @@ begin
 
 	fpga_rst <= not pi_rst_n;
 	usr_rst <= not pi_btn(0);
-	po_cam_rst <= '1';
+	po_cam_rst <= pi_btn(2);
 	po_cam_pwdn <= '0';
 
 	-- PLL 24 MHz for ov2640 system clock
