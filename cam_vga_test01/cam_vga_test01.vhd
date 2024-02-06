@@ -65,6 +65,7 @@ component PLL
 		refclk   : in  std_logic := '0'; --  refclk.clk
 		rst      : in  std_logic := '0'; --   reset.reset
 		outclk_0 : out std_logic;        -- outclk0.clk
+		outclk_1 : out std_logic;        -- outclk1.clk
 		locked   : out std_logic         --  locked.export
 	);
 end component;
@@ -96,6 +97,87 @@ record
 	delay_cnt : integer;
 end record;
 
+function hex_to_7seg (
+	indata : in std_logic_vector
+	) return std_logic_vector
+	is
+variable retdata : std_logic_vector(6 downto 0);
+begin
+	if (unsigned(indata) = 0) then
+		retdata := "1000000";
+	elsif (unsigned(indata) = 1) then
+		retdata := "1111001";
+	elsif (unsigned(indata) = 2) then
+		retdata := "0100100";
+	elsif (unsigned(indata) = 3) then
+		retdata := "0110000";
+	elsif (unsigned(indata) = 4) then
+		retdata := "0011001";
+	elsif (unsigned(indata) = 5) then
+		retdata := "0010010";
+	elsif (unsigned(indata) = 6) then
+		retdata := "0000010";
+	elsif (unsigned(indata) = 7) then
+		retdata := "1011000";
+	elsif (unsigned(indata) = 8) then
+		retdata := "0000000";
+	elsif (unsigned(indata) = 9) then
+		retdata := "0010000";
+	elsif (unsigned(indata) = 10) then
+		retdata := "0001000";
+	elsif (unsigned(indata) = 11) then
+		retdata := "0000011";
+	elsif (unsigned(indata) = 12) then
+		retdata := "1000110";
+	elsif (unsigned(indata) = 13) then
+		retdata := "0100001";
+	elsif (unsigned(indata) = 14) then
+		retdata := "0000110";
+	elsif (unsigned(indata) = 15) then
+		retdata := "0001110";
+	else
+		retdata := "1111111";
+	end if;
+	return retdata;
+end hex_to_7seg;
+
+function hex_to_7seg (
+	indata : in unsigned
+	) return std_logic_vector
+	is
+variable indata_v : std_logic_vector(indata'length - 1 downto 0);
+begin
+	indata_v := std_logic_vector(indata);
+	return hex_to_7seg(indata_v);
+end hex_to_7seg;
+
+signal cm_i2c_ce				: std_logic;
+signal cm_i2c_we				: std_logic;
+
+-- ov2640 i2c addr = 0x30.
+signal cm_i2c_dev_addr		: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(16#30#, 7));
+signal cm_i2c_reg_addr		: std_logic_vector(7 downto 0);
+signal cm_i2c_set_value		: std_logic_vector(7 downto 0);
+signal cm_i2c_read_value	: std_logic_vector(7 downto 0);
+
+signal fpga_rst 				: std_logic;
+signal usr_rst 				: std_logic;
+signal pll_locked 			: std_logic;
+
+signal internal_80m_clk		: std_logic;
+
+signal wk_cam_href			: std_logic;
+signal wk_cam_href_old		: std_logic;
+
+signal href_cnt	: std_logic_vector(10 downto 0);
+
+
+signal jtag_i2c_clk			: std_logic;
+signal jtag_cam_clk			: std_logic;
+
+
+---------------------------------------------------------
+
 constant INIT_DELAY : integer := 2500;
 constant I2C_FRM_CNT : integer := 6400 * 4;
 constant I2C_EN_CNT : integer := 5000 * 4;
@@ -105,7 +187,6 @@ constant DELAY_5MS : integer := 250000;
 constant DEV_END_MARKER : std_logic_vector(7 downto 0) := "00000000";
 
 type i2c_init_array is array (0 to 198) of i2c_set_t;
-
 
 constant init_data_ov2640 : i2c_init_array := (
 	('0', std_logic_vector(to_unsigned(16#0a#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),  -- read PID low, read value: 0x26
@@ -310,77 +391,6 @@ constant init_data_ov2640 : i2c_init_array := (
 );
 
 
-
-function hex_to_7seg (
-	indata : in std_logic_vector
-	) return std_logic_vector
-	is
-variable retdata : std_logic_vector(6 downto 0);
-begin
-	if (unsigned(indata) = 0) then
-		retdata := "1000000";
-	elsif (unsigned(indata) = 1) then
-		retdata := "1111001";
-	elsif (unsigned(indata) = 2) then
-		retdata := "0100100";
-	elsif (unsigned(indata) = 3) then
-		retdata := "0110000";
-	elsif (unsigned(indata) = 4) then
-		retdata := "0011001";
-	elsif (unsigned(indata) = 5) then
-		retdata := "0010010";
-	elsif (unsigned(indata) = 6) then
-		retdata := "0000010";
-	elsif (unsigned(indata) = 7) then
-		retdata := "1011000";
-	elsif (unsigned(indata) = 8) then
-		retdata := "0000000";
-	elsif (unsigned(indata) = 9) then
-		retdata := "0010000";
-	elsif (unsigned(indata) = 10) then
-		retdata := "0001000";
-	elsif (unsigned(indata) = 11) then
-		retdata := "0000011";
-	elsif (unsigned(indata) = 12) then
-		retdata := "1000110";
-	elsif (unsigned(indata) = 13) then
-		retdata := "0100001";
-	elsif (unsigned(indata) = 14) then
-		retdata := "0000110";
-	elsif (unsigned(indata) = 15) then
-		retdata := "0001110";
-	else
-		retdata := "1111111";
-	end if;
-	return retdata;
-end hex_to_7seg;
-
-function hex_to_7seg (
-	indata : in unsigned
-	) return std_logic_vector
-	is
-variable indata_v : std_logic_vector(indata'length - 1 downto 0);
-begin
-	indata_v := std_logic_vector(indata);
-	return hex_to_7seg(indata_v);
-end hex_to_7seg;
-
-signal cm_i2c_ce				: std_logic;
-signal cm_i2c_we				: std_logic;
-
--- ov2640 i2c addr = 0x30.
-signal cm_i2c_dev_addr		: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(16#30#, 7));
-signal cm_i2c_reg_addr		: std_logic_vector(7 downto 0);
-signal cm_i2c_set_value		: std_logic_vector(7 downto 0);
-signal cm_i2c_read_value	: std_logic_vector(7 downto 0);
-
-signal fpga_rst 				: std_logic;
-signal usr_rst 				: std_logic;
-signal pll_locked 			: std_logic;
-
-signal jtag_i2c_clk			: std_logic;
-signal jtag_cam_clk			: std_logic;
-
 begin
 
 	fpga_rst <= not pi_rst_n;
@@ -393,10 +403,12 @@ begin
 	po_cam_pwdn <= '0';
 
 	-- PLL 24 MHz for ov2640 system clock
+	-- pclk is 37 MHz, internal work clock is 80 MHz
 	pll_inst : PLL port map (
 		pi_clk_50m,
 		fpga_rst,
 		po_cam_xvclk,
+		internal_80m_clk,
 		pll_locked);
 
 	-- i2c encoder
@@ -519,5 +531,28 @@ begin
 --	jtag_clk <= jtag_cam_clk;
 	jtag_clk <= pi_clk_50m;
 
+
+	cam_clk_p : process (internal_80m_clk)
+	begin
+		if (rising_edge(internal_80m_clk)) then
+			wk_cam_href <= pi_cam_href;
+			wk_cam_href_old <= wk_cam_href;
+		end if;
+	end process;
+
+	hcnt_p : process (internal_80m_clk)
+	variable wk_add : unsigned (10 downto 0) := "00000000000";
+	begin
+		if (rising_edge(internal_80m_clk)) then
+			wk_add := unsigned(href_cnt);
+			if (pi_cam_vsync = '1') then
+				href_cnt <= (others => '0');
+			else
+				if (wk_cam_href_old = '0' and wk_cam_href = '1') then
+					href_cnt <= std_logic_vector(wk_add + 1);
+				end if;
+			end if;
+		end if;
+	end process;
 
 end rtl;
