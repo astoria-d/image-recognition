@@ -636,6 +636,18 @@ signal jtag_cam_clk			: std_logic;
 
 signal usr_mode 				: unsigned(1 downto 0) := "00";
 
+-- for debugging
+signal vsync_cnt				: unsigned(6 downto 0);
+-- max 1232
+signal href_cnt				: unsigned(10 downto 0);
+-- max 1632
+signal pclk_cnt				: unsigned(10 downto 0);
+
+signal prev_vsync				: std_logic;
+signal prev_href				: std_logic;
+signal prev_pclk				: std_logic;
+
+
 begin
 
 	fpga_rst <= not pi_rst_n;
@@ -749,7 +761,41 @@ begin
 			if (usr_rst = '1') then
 				po_led <= (others => '0');
 			else
-				po_led <= (others => '1');
+				po_led(0) <= pi_cam_href;
+				po_led(1) <= pi_cam_vsync;
+				po_led(2) <= pi_cam_pclk;
+				po_led(3) <= vsync_cnt(4);
+				po_led(9 downto 4) <= (others => '1');
+			end if;
+		end if;
+	end process;
+
+
+	counter_p : process (pi_clk_50m)
+	begin
+		if (rising_edge(pi_clk_50m)) then
+			if (fpga_rst = '1') then
+				vsync_cnt <= (others => '0');
+				href_cnt <= (others => '0');
+				pclk_cnt <= (others => '0');
+				prev_vsync <= '0';
+				prev_href <= '0';
+				prev_pclk <= '0';
+			else
+				if (prev_vsync = '0' and pi_cam_vsync = '1') then
+					vsync_cnt <= vsync_cnt + 1;
+				end if;
+
+				if (pi_cam_vsync = '1') then
+					href_cnt <= (others => '0');
+				else
+					if (prev_href = '0' and pi_cam_href = '1') then
+						href_cnt <= href_cnt + 1;
+					end if;
+				end if;
+
+				prev_vsync <= pi_cam_vsync;
+				prev_href <= pi_cam_href;
 			end if;
 		end if;
 	end process;
