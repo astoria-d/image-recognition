@@ -364,5 +364,25 @@ set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[24] -
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[28] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[29] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[30] -to auto_signaltap_0|vcc -section_id auto_signaltap_0
+set_location_assignment PIN_AA2 -to po_led[0]
+set_location_assignment PIN_AA1 -to po_led[1]
+set_location_assignment PIN_W2 -to po_led[2]
+set_location_assignment PIN_Y3 -to po_led[3]
+set_location_assignment PIN_N2 -to po_led[4]
+set_location_assignment PIN_N1 -to po_led[5]
+set_location_assignment PIN_U2 -to po_led[6]
+set_location_assignment PIN_U1 -to po_led[7]
+set_location_assignment PIN_L2 -to po_led[8]
+set_location_assignment PIN_L1 -to po_led[9]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[9]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[8]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to po_led[0]
 set_global_assignment -name SLD_FILE db/cam_vga_test01_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -54,6 +54,9 @@ port (
 	po_svn_seg4		: out std_logic_vector(6 downto 0);
 	po_svn_seg5		: out std_logic_vector(6 downto 0);
 
+	-- LEDs
+	po_led			: out std_logic_vector(9 downto 0);
+
 	--logic analyzer reference clock
 	jtag_clk		: out std_logic
 );
@@ -710,7 +713,7 @@ begin
 	svn_umode_seg_p : process (pi_clk_50m)
 	begin
 		if (rising_edge(pi_clk_50m)) then
-			if (fpga_rst = '1') then
+			if (usr_rst = '1') then
 				po_svn_seg0 <= (others => '1');
 			else
 				po_svn_seg0 <= hex_to_7seg(usr_mode);
@@ -721,7 +724,7 @@ begin
 	addr_seg_p : process (pi_clk_50m)
 	begin
 		if (rising_edge(pi_clk_50m)) then
-			if (fpga_rst = '1') then
+			if (usr_rst = '1') then
 				po_svn_seg2 <= (others => '1');
 				po_svn_seg3 <= (others => '1');
 
@@ -739,6 +742,17 @@ begin
 
 	po_svn_seg1 <= (others => '1');
 
+	led_p : process (pi_clk_50m)
+	begin
+		if (rising_edge(pi_clk_50m)) then
+
+			if (usr_rst = '1') then
+				po_led <= (others => '0');
+			else
+				po_led <= (others => '1');
+			end if;
+		end if;
+	end process;
 
 	-- initialize camera
 	cam_set_p : process (pi_clk_50m)
