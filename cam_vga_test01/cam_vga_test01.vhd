@@ -759,13 +759,14 @@ begin
 		if (rising_edge(pi_clk_50m)) then
 
 			if (usr_rst = '1') then
-				po_led <= (others => '0');
+				po_led(9 downto 0) <= (others => '0');
 			else
 				po_led(0) <= pi_cam_href;
 				po_led(1) <= pi_cam_vsync;
-				po_led(2) <= pi_cam_pclk;
-				po_led(3) <= vsync_cnt(4);
-				po_led(9 downto 4) <= (others => '1');
+--				po_led(2) <= pi_cam_pclk;
+				po_led(3) <= vsync_cnt(3);
+				po_led(4) <= pclk_cnt(10);
+				po_led(9 downto 5) <= (others => '0');
 			end if;
 		end if;
 	end process;
@@ -777,7 +778,6 @@ begin
 			if (fpga_rst = '1') then
 				vsync_cnt <= (others => '0');
 				href_cnt <= (others => '0');
-				pclk_cnt <= (others => '0');
 				prev_vsync <= '0';
 				prev_href <= '0';
 				prev_pclk <= '0';
@@ -869,6 +869,21 @@ begin
 					if (init_data.we = '0' and init_data.reg_addr = DEV_END_MARKER and init_data.reg_value = DEV_END_MARKER) then
 						init_done := '1';
 					end if;
+				end if;
+			end if;
+		end if;
+	end process;
+
+	pclk_p : process (pi_cam_pclk)
+	begin
+		if (rising_edge(pi_cam_pclk)) then
+			if (usr_rst = '1') then
+					pclk_cnt <= (others => '0');
+			else
+				if (prev_href = '1') then
+					pclk_cnt <= (others => '0');
+				else
+					pclk_cnt <= pclk_cnt + 1;
 				end if;
 			end if;
 		end if;
