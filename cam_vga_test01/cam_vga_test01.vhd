@@ -652,6 +652,9 @@ signal prev_vsync				: std_logic;
 signal prev_href				: std_logic;
 signal prev_pclk				: std_logic;
 
+signal cam_r					: std_logic_vector(7 downto 0);
+signal cam_g					: std_logic_vector(7 downto 0);
+signal cam_b					: std_logic_vector(7 downto 0);
 
 begin
 
@@ -776,35 +779,6 @@ begin
 		end if;
 	end process;
 
-
-	counter_p : process (pi_clk_50m)
-	begin
-		if (rising_edge(pi_clk_50m)) then
-			if (fpga_rst = '1') then
-				vsync_cnt <= (others => '0');
-				href_cnt <= (others => '0');
-				prev_vsync <= '0';
-				prev_href <= '0';
-				prev_pclk <= '0';
-			else
-				if (prev_vsync = '0' and pi_cam_vsync = '1') then
-					vsync_cnt <= vsync_cnt + 1;
-				end if;
-
-				if (pi_cam_vsync = '1') then
-					href_cnt <= (others => '0');
-				else
-					if (prev_href = '0' and pi_cam_href = '1') then
-						href_cnt <= href_cnt + 1;
-					end if;
-				end if;
-
-				prev_vsync <= pi_cam_vsync;
-				prev_href <= pi_cam_href;
-			end if;
-		end if;
-	end process;
-
 	-- initialize camera
 	cam_set_p : process (pi_clk_50m)
 	variable frm_cnt : integer := 0;
@@ -879,6 +853,35 @@ begin
 		end if;
 	end process;
 
+
+	counter_p : process (pi_clk_50m)
+	begin
+		if (rising_edge(pi_clk_50m)) then
+			if (fpga_rst = '1') then
+				vsync_cnt <= (others => '0');
+				href_cnt <= (others => '0');
+				prev_vsync <= '0';
+				prev_href <= '0';
+				prev_pclk <= '0';
+			else
+				if (prev_vsync = '0' and pi_cam_vsync = '1') then
+					vsync_cnt <= vsync_cnt + 1;
+				end if;
+
+				if (pi_cam_vsync = '1') then
+					href_cnt <= (others => '0');
+				else
+					if (prev_href = '0' and pi_cam_href = '1') then
+						href_cnt <= href_cnt + 1;
+					end if;
+				end if;
+
+				prev_vsync <= pi_cam_vsync;
+				prev_href <= pi_cam_href;
+			end if;
+		end if;
+	end process;
+
 	pclk_p : process (pi_cam_pclk)
 	begin
 		if (rising_edge(pi_cam_pclk)) then
@@ -889,6 +892,31 @@ begin
 					pclk_cnt <= (others => '0');
 				else
 					pclk_cnt <= pclk_cnt + 1;
+				end if;
+			end if;
+		end if;
+	end process;
+
+	cam_rgb_p : process (pi_cam_pclk)
+	begin
+		if (rising_edge(pi_cam_pclk)) then
+			if (usr_rst = '1') then
+					cam_r <= (others => '0');
+					cam_g <= (others => '0');
+					cam_b <= (others => '0');
+			else
+				if (vsync_cnt(0) = '0') then
+					if (pclk_cnt(0) = '0') then
+						cam_b <= pi_cam_d;
+					else
+						cam_g <= pi_cam_d;
+					end if;
+				else
+					if (pclk_cnt(0) = '0') then
+						cam_g <= pi_cam_d;
+					else
+						cam_r <= pi_cam_d;
+					end if;
 				end if;
 			end if;
 		end if;
@@ -909,8 +937,8 @@ begin
 	end process;
 
 --	jtag_clk <= jtag_i2c_clk;
---	jtag_clk <= jtag_cam_clk;
-	jtag_clk <= pi_clk_50m;
+	jtag_clk <= jtag_cam_clk;
+--	jtag_clk <= pi_clk_50m;
 
 
 end rtl;
