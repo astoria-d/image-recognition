@@ -409,11 +409,13 @@ constant init_data_ov2640 : i2c_init_array := (
 	('1', std_logic_vector(to_unsigned(16#73#, 8)), std_logic_vector(to_unsigned(16#c1#, 8)), I2C_FRM_CNT),
 	-- COM7, SVGA mode
 	('1', std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#40#, 8)), I2C_FRM_CNT),
+	-- HREFST, HREFED, VSTRT, VEND, REG32: Window setting?
 	('1', std_logic_vector(to_unsigned(16#17#, 8)), std_logic_vector(to_unsigned(16#11#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#18#, 8)), std_logic_vector(to_unsigned(16#43#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#19#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#1a#, 8)), std_logic_vector(to_unsigned(16#4b#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#32#, 8)), std_logic_vector(to_unsigned(16#09#, 8)), I2C_FRM_CNT),
+
 	('1', std_logic_vector(to_unsigned(16#37#, 8)), std_logic_vector(to_unsigned(16#c0#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#4f#, 8)), std_logic_vector(to_unsigned(16#ca#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#50#, 8)), std_logic_vector(to_unsigned(16#a8#, 8)), I2C_FRM_CNT),
@@ -921,7 +923,7 @@ begin
 	-- i2c jtag clock is 1/512 of 50mhz
 	-- cam jtag clock is 1/2 of 50mhz
 	jtag_clk_p : process (pi_clk_50m)
-	variable div : unsigned (7 downto 0) := "00000000";
+	variable div : unsigned (10 downto 0) := (others => '0');
 	begin
 		if (rising_edge(pi_clk_50m)) then
 			div := div + 1;
