@@ -97,17 +97,13 @@ component cam_vga
 		-- input clock 50 mhz
 		pi_clk_50m,
 
-		-- camera 36 mhz
-		pi_cam_pclk 	: in std_logic;
-
 		-- user reset signal
 		usr_rst 			: std_logic;
 
 		-- camera data interface
-		pi_cam_href		: in std_logic;
-		pi_cam_vsync	: in std_logic;
-		pi_cam_y			: in std_logic_vector(1 downto 0);
-		pi_cam_d			: in std_logic_vector(7 downto 0);
+		cam_r				: in std_logic_vector(4 downto 0);
+		cam_g				: in std_logic_vector(5 downto 0);
+		cam_b				: in std_logic_vector(4 downto 0);
 
 		-- vga output
 		po_h_sync_n		: out std_logic;
@@ -653,9 +649,10 @@ signal pclk_cnt				: unsigned(10 downto 0);
 signal prev_vsync				: std_logic;
 signal prev_href				: std_logic;
 
-signal cam_r					: std_logic_vector(7 downto 0);
-signal cam_g					: std_logic_vector(7 downto 0);
-signal cam_b					: std_logic_vector(7 downto 0);
+-- rgb565
+signal cam_r					: std_logic_vector(4 downto 0);
+signal cam_g					: std_logic_vector(5 downto 0);
+signal cam_b					: std_logic_vector(4 downto 0);
 
 begin
 
@@ -688,29 +685,25 @@ begin
 		po_cam_scl,
 		pio_cam_sda);
 
---	cm_vga_inst : cam_vga port map (
---		-- input clock 50 mhz
---		pi_clk_50m,
---
---		-- camera 36 mhz
---		pi_cam_pclk,
---
---		-- user reset signal
---		usr_rst,
---
---		-- camera data interface
---		pi_cam_href,
---		pi_cam_vsync,
---		pi_cam_y,
---		pi_cam_d,
---
---		-- vga output
---		po_h_sync_n,
---		po_v_sync_n,
---		po_r,
---		po_g,
---		po_b
---	);
+	cm_vga_inst : cam_vga port map (
+		-- input clock 50 mhz
+		pi_clk_50m,
+
+		-- user reset signal
+		usr_rst,
+
+		-- camera data interface
+		cam_r,
+		cam_g,
+		cam_b,
+
+		-- vga output
+		po_h_sync_n,
+		po_v_sync_n,
+		po_r,
+		po_g,
+		po_b
+	);
 
 	-- i2c device address mode
 	mode_p : process (pi_clk_50m)
@@ -902,19 +895,29 @@ begin
 					cam_g <= (others => '0');
 					cam_b <= (others => '0');
 			else
-				if (vsync_cnt(0) = '0') then
-					if (pclk_cnt(0) = '0') then
-						cam_b <= pi_cam_d;
-					else
-						cam_g <= pi_cam_d;
-					end if;
+--				if (vsync_cnt(0) = '0') then
+--					if (pclk_cnt(0) = '0') then
+--						cam_b <= pi_cam_d;
+--					else
+--						cam_g <= pi_cam_d;
+--					end if;
+--				else
+--					if (pclk_cnt(0) = '0') then
+--						cam_g <= pi_cam_d;
+--					else
+--						cam_r <= pi_cam_d;
+--					end if;
+--				end if;
+
+				-- rgb 565 format.
+				if (pclk_cnt(0) = '1') then
+					cam_r <= pi_cam_d(7 downto 3);
+					cam_g(5 downto 3) <= pi_cam_d(2 downto 0);
 				else
-					if (pclk_cnt(0) = '0') then
-						cam_g <= pi_cam_d;
-					else
-						cam_r <= pi_cam_d;
-					end if;
+					cam_g(2 downto 0) <= pi_cam_d(7 downto 5);
+					cam_b <= pi_cam_d(4 downto 0);
 				end if;
+
 			end if;
 		end if;
 	end process;
