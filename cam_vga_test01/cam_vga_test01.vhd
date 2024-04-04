@@ -355,8 +355,8 @@ constant init_data_ov2640 : i2c_init_array := (
 	-- bank 1
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#3c#, 8)), std_logic_vector(to_unsigned(16#32#, 8)), I2C_FRM_CNT),
-	-- CLKRC: PCLK = XCLK/2
-	('1', std_logic_vector(to_unsigned(16#11#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
+	-- CLKRC: PCLK = XCLK/4
+	('1', std_logic_vector(to_unsigned(16#11#, 8)), std_logic_vector(to_unsigned(16#03#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#09#, 8)), std_logic_vector(to_unsigned(16#02#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#04#, 8)), std_logic_vector(to_unsigned(16#28#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#13#, 8)), std_logic_vector(to_unsigned(16#e5#, 8)), I2C_FRM_CNT),
@@ -895,19 +895,23 @@ begin
 					cam_g <= (others => '0');
 					cam_b <= (others => '0');
 			else
-				if (href_cnt(0) = '0') then
-					if (pclk_cnt(0) = '0') then
-						cam_r <= pi_cam_d(7 downto 3);
+
+				if (href_cnt > 12) then
+					if (href_cnt(0) = '0') then
+						if (pclk_cnt(0) = '0') then
+							cam_r <= pi_cam_d(7 downto 3);
+						else
+							cam_g <= pi_cam_d(7 downto 2);
+						end if;
 					else
-						cam_g <= pi_cam_d(7 downto 2);
-					end if;
-				else
-					if (pclk_cnt(0) = '0') then
-						cam_g <= pi_cam_d(7 downto 2);
-					else
-						cam_b <= pi_cam_d(7 downto 3);
+						if (pclk_cnt(0) = '0') then
+							cam_g <= pi_cam_d(7 downto 2);
+						else
+--							cam_b <= pi_cam_d(7 downto 3);
+						end if;
 					end if;
 				end if;
+
 
 --				-- rgb 565 format.
 --				if (pclk_cnt(0) = '1') then
