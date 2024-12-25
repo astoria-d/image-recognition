@@ -150,8 +150,8 @@ constant init_data_ov2640 : i2c_init_array := (
 	-- bank 1
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#3c#, 8)), std_logic_vector(to_unsigned(16#32#, 8)), I2C_FRM_CNT),
-	-- CLKRC: PCLK = XCLK/4
-	('1', std_logic_vector(to_unsigned(16#11#, 8)), std_logic_vector(to_unsigned(16#03#, 8)), I2C_FRM_CNT),
+	-- CLKRC: PCLK = XCLK/1
+	('1', std_logic_vector(to_unsigned(16#11#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#09#, 8)), std_logic_vector(to_unsigned(16#02#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#04#, 8)), std_logic_vector(to_unsigned(16#28#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#13#, 8)), std_logic_vector(to_unsigned(16#e5#, 8)), I2C_FRM_CNT),
@@ -676,7 +676,8 @@ begin
 	end process;
 
 --	jtag_clk <= jtag_i2c_clk;
-	jtag_clk <= jtag_cam_clk;
+--	jtag_clk <= jtag_cam_clk;
+	jtag_clk <= pi_cam_pclk;
 --	jtag_clk <= pi_clk_50m;
 
 
