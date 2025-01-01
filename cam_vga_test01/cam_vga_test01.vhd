@@ -916,7 +916,8 @@ begin
 					cam_b <= (others => '0');
 			else
 
-				if (pi_cam_href = '1' and prev_vsync = '1') then
+--				if (pi_cam_href = '1' and prev_vsync = '1') then
+				if (pclk_cnt >= 100 and pclk_cnt <= 101 and href_cnt >= 50 and href_cnt <= 51) then
 					if (href_cnt(0) = '0') then
 						if (pclk_cnt(0) = '0') then
 							cam_r <= pi_cam_d(7 downto 3);
@@ -930,10 +931,10 @@ begin
 							cam_b <= pi_cam_d(7 downto 3);
 						end if;
 					end if;
-				else
-					cam_r <= (others => '0');
-					cam_g <= (others => '0');
-					cam_b <= (others => '0');
+--				else
+--					cam_r <= (others => '0');
+--					cam_g <= (others => '0');
+--					cam_b <= (others => '0');
 				end if;
 
 
