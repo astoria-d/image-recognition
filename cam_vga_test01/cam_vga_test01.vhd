@@ -542,15 +542,15 @@ constant init_data_ov2640 : i2c_init_array := (
 	('1', std_logic_vector(to_unsigned(16#57#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#86#, 8)), std_logic_vector(to_unsigned(16#3d#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#50#, 8)), std_logic_vector(to_unsigned(16#80#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#51#, 8)), std_logic_vector(to_unsigned(16#4b#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#52#, 8)), std_logic_vector(to_unsigned(16#4a#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#53#, 8)), std_logic_vector(to_unsigned(16#32#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#54#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#55#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#57#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#5a#, 8)), std_logic_vector(to_unsigned(16#18#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#5b#, 8)), std_logic_vector(to_unsigned(16#18#, 8)), I2C_FRM_CNT),
-	('1', std_logic_vector(to_unsigned(16#5c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#51#, 8)), std_logic_vector(to_unsigned(16#4b#, 8)), I2C_FRM_CNT), -- HSIZE 
+	('1', std_logic_vector(to_unsigned(16#52#, 8)), std_logic_vector(to_unsigned(16#4a#, 8)), I2C_FRM_CNT), -- VSIZE
+	('1', std_logic_vector(to_unsigned(16#53#, 8)), std_logic_vector(to_unsigned(16#32#, 8)), I2C_FRM_CNT), -- XOFFL
+	('1', std_logic_vector(to_unsigned(16#54#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT), -- YOFFL
+	('1', std_logic_vector(to_unsigned(16#55#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT), -- VHYX
+	('1', std_logic_vector(to_unsigned(16#57#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT), -- TEST
+	('1', std_logic_vector(to_unsigned(16#5a#, 8)), std_logic_vector(to_unsigned(16#18#, 8)), I2C_FRM_CNT), -- ZMOW
+	('1', std_logic_vector(to_unsigned(16#5b#, 8)), std_logic_vector(to_unsigned(16#18#, 8)), I2C_FRM_CNT), -- ZMOH
+	('1', std_logic_vector(to_unsigned(16#5c#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT), -- ZMHH
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#11#, 8)), std_logic_vector(to_unsigned(16#03#, 8)), I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
