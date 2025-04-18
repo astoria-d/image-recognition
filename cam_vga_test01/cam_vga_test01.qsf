@@ -56,30 +56,28 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_location_assignment PIN_V15 -to jtag_clk
-set_location_assignment PIN_G13 -to pi_cam_d[7]
+set_location_assignment PIN_F14 -to pi_cam_d[7]
 set_location_assignment PIN_G12 -to pi_cam_d[6]
-set_location_assignment PIN_J17 -to pi_cam_d[5]
-set_location_assignment PIN_A15 -to pi_cam_d[4]
-set_location_assignment PIN_E15 -to pi_cam_d[3]
-set_location_assignment PIN_L8 -to pi_cam_d[2]
-set_location_assignment PIN_C15 -to pi_cam_d[1]
-set_location_assignment PIN_B15 -to pi_cam_d[0]
-set_location_assignment PIN_F12 -to pi_cam_href
-set_location_assignment PIN_G16 -to pi_cam_pclk
-set_location_assignment PIN_F13 -to pi_cam_vsync
-set_location_assignment PIN_A14 -to pi_cam_y[1]
-set_location_assignment PIN_E14 -to pi_cam_y[0]
+set_location_assignment PIN_F13 -to pi_cam_d[5]
+set_location_assignment PIN_G15 -to pi_cam_d[4]
+set_location_assignment PIN_G16 -to pi_cam_d[3]
+set_location_assignment PIN_F12 -to pi_cam_d[2]
+set_location_assignment PIN_G13 -to pi_cam_d[1]
+set_location_assignment PIN_F15 -to pi_cam_d[0]
+set_location_assignment PIN_E15 -to pi_cam_href
+set_location_assignment PIN_K16 -to pi_cam_pclk
+set_location_assignment PIN_E16 -to pi_cam_vsync
 set_location_assignment PIN_M9 -to pi_clk_50m
 set_location_assignment PIN_P22 -to pi_rst_n
-set_location_assignment PIN_F15 -to pio_cam_sda
+set_location_assignment PIN_A14 -to pio_cam_sda
 set_location_assignment PIN_A7 -to po_b[3]
 set_location_assignment PIN_A8 -to po_b[2]
 set_location_assignment PIN_B7 -to po_b[1]
 set_location_assignment PIN_B6 -to po_b[0]
-set_location_assignment PIN_E16 -to po_cam_pwdn
-set_location_assignment PIN_J13 -to po_cam_rst
-set_location_assignment PIN_F14 -to po_cam_scl
-set_location_assignment PIN_G15 -to po_cam_xvclk
+set_location_assignment PIN_C15 -to po_cam_pwdn
+set_location_assignment PIN_J17 -to po_cam_rst
+set_location_assignment PIN_B15 -to po_cam_scl
+set_location_assignment PIN_E14 -to po_cam_xvclk
 set_location_assignment PIN_J8 -to po_g[3]
 set_location_assignment PIN_J7 -to po_g[2]
 set_location_assignment PIN_K7 -to po_g[1]
@@ -102,8 +100,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pi_cam_d[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pi_cam_href
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pi_cam_vsync
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pi_cam_pclk
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pi_cam_y[1]
-set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pi_cam_y[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pi_clk_50m
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pi_rst_n
 set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to pio_cam_sda

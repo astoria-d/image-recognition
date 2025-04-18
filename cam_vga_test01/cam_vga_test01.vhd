@@ -36,7 +36,6 @@ port (
 	pi_cam_vsync	: in std_logic;
 	pi_cam_pclk		: in std_logic;
 
-	pi_cam_y			: in std_logic_vector(1 downto 0);
 	pi_cam_d			: in std_logic_vector(7 downto 0);
 
 	--7 seg LED 0
