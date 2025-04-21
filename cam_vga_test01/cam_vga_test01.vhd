@@ -593,13 +593,13 @@ begin
 				po_led(2) <= pi_cam_pclk;
 				po_led(3) <= pi_cam_href;
 				po_led(4) <= pi_cam_vsync;
-				po_led(5) <= vsync_cnt(4);
-				po_led(6) <= pclk_cnt(10);
+				po_led(5) <= pclk_cnt(10);
+				po_led(6) <= href_cnt(7);
+				po_led(7) <= vsync_cnt(4);
 				-- cam_rst
-				po_led(7) <= pi_switch(0);
+				po_led(8) <= pi_switch(0);
 				-- cam_pwr_down
-				po_led(8) <= pi_switch(1);
-				po_led(9) <= '0';
+				po_led(9) <= pi_switch(1);
 			end if;
 		end if;
 	end process;
