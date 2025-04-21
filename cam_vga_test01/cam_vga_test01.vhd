@@ -134,7 +134,7 @@ constant INIT_DELAY : integer := DELAY_1S;
 
 constant DEV_END_MARKER : std_logic_vector(7 downto 0) := "00000000";
 
-type i2c_init_array is array (0 to 266) of i2c_set_t;
+type i2c_init_array is array (0 to 268) of i2c_set_t;
 
 constant init_data_ov2640 : i2c_init_array := (
 	-- read device id
@@ -413,7 +413,11 @@ constant init_data_ov2640 : i2c_init_array := (
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#00#, 8)), I2C_FRM_CNT),
 	('0', std_logic_vector(to_unsigned(16#86#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
 	('1', std_logic_vector(to_unsigned(16#ff#, 8)), std_logic_vector(to_unsigned(16#01#, 8)), I2C_FRM_CNT),
+	('0', std_logic_vector(to_unsigned(16#12#, 8)), "ZZZZZZZZ", DELAY_1S),
+
+	-- color bar enable
 	('0', std_logic_vector(to_unsigned(16#12#, 8)), "ZZZZZZZZ", I2C_FRM_CNT),
+	('1', std_logic_vector(to_unsigned(16#12#, 8)), std_logic_vector(to_unsigned(16#22#, 8)), DELAY_1S),
 
 	('0', DEV_END_MARKER, DEV_END_MARKER, 0)
 );
@@ -487,7 +491,6 @@ signal usr_rst 				: std_logic;
 signal pll_locked 			: std_logic;
 
 signal jtag_i2c_clk			: std_logic;
-signal jtag_cam_clk			: std_logic;
 
 -- for debugging
 signal vsync_cnt				: unsigned(6 downto 0);
@@ -495,6 +498,8 @@ signal vsync_cnt				: unsigned(6 downto 0);
 signal href_cnt				: unsigned(10 downto 0);
 -- max 1632
 signal pclk_cnt				: unsigned(10 downto 0);
+
+signal pclk_div				: unsigned(10 downto 0);
 
 signal prev_vsync				: std_logic;
 signal prev_href				: std_logic;
@@ -588,12 +593,13 @@ begin
 				po_led(2) <= pi_cam_pclk;
 				po_led(3) <= pi_cam_href;
 				po_led(4) <= pi_cam_vsync;
-				po_led(5) <= '0';
+				po_led(5) <= vsync_cnt(4);
+				po_led(6) <= pclk_cnt(10);
 				-- cam_rst
-				po_led(6) <= pi_switch(0);
+				po_led(7) <= pi_switch(0);
 				-- cam_pwr_down
-				po_led(7) <= pi_switch(1);
-				po_led(9 downto 8) <= (others => '0');
+				po_led(8) <= pi_switch(1);
+				po_led(9) <= '0';
 			end if;
 		end if;
 	end process;
@@ -674,7 +680,10 @@ begin
 
 				prev_vsync <= '0';
 				prev_href <= '0';
+				pclk_div <= (others => '0');
 			else
+
+				pclk_div <= pclk_div + 1;
 
 				if (pi_cam_href = '0') then
 					pclk_cnt <= (others => '0');
@@ -731,15 +740,16 @@ begin
 		if (rising_edge(pi_clk_50m)) then
 			div := div + 1;
 			jtag_i2c_clk <= div(5);
-			jtag_cam_clk <= div(0);
---			jtag_cam_clk <= div(6);
 		end if;
 	end process;
 
 --	jtag_clk <= jtag_i2c_clk;
---	jtag_clk <= jtag_cam_clk;
-	jtag_clk <= pi_cam_pclk;
 --	jtag_clk <= pi_clk_50m;
+
+					-- for vsync debug. divide pclk...
+	jtag_clk <= pclk_div(6) when pi_switch(2) = '1' else
+					-- pclk
+					pi_cam_pclk;
 
 
 end rtl;
