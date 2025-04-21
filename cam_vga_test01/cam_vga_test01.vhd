@@ -586,9 +586,9 @@ begin
 				po_led(0) <= cm_i2c_ce;
 				po_led(1) <= cm_i2c_we;
 				po_led(2) <= pi_cam_pclk;
-				po_led(3) <= pclk_cnt(0);
-				po_led(4) <= href_cnt(0);
-				po_led(5) <= vsync_cnt(0);
+				po_led(3) <= pi_cam_href;
+				po_led(4) <= pi_cam_vsync;
+				po_led(5) <= '0';
 				-- cam_rst
 				po_led(6) <= pi_switch(0);
 				-- cam_pwr_down
@@ -666,7 +666,7 @@ begin
 
 	counter_p : process (pi_cam_pclk)
 	begin
-		if (rising_edge(pi_cam_pclk)) then
+		if (falling_edge(pi_cam_pclk)) then
 			if (usr_rst = '1') then
 				pclk_cnt <= (others => '0');
 				vsync_cnt <= (others => '0');
@@ -702,43 +702,21 @@ begin
 
 	cam_rgb_p : process (pi_cam_pclk)
 	begin
-		if (rising_edge(pi_cam_pclk)) then
+		if (falling_edge(pi_cam_pclk)) then
 			if (usr_rst = '1') then
 					cam_r <= (others => '0');
 					cam_g <= (others => '0');
 					cam_b <= (others => '0');
 			else
 
---				if (pi_cam_href = '1' and prev_vsync = '1') then
-				if (pclk_cnt >= 100 and pclk_cnt <= 101 and href_cnt >= 50 and href_cnt <= 51) then
-					if (href_cnt(0) = '0') then
-						if (pclk_cnt(0) = '0') then
-							cam_r <= pi_cam_d(7 downto 3);
-						else
-							cam_g <= pi_cam_d(7 downto 2);
-						end if;
-					else
-						if (pclk_cnt(0) = '0') then
-							cam_g <= pi_cam_d(7 downto 2);
-						else
-							cam_b <= pi_cam_d(7 downto 3);
-						end if;
-					end if;
---				else
---					cam_r <= (others => '0');
---					cam_g <= (others => '0');
---					cam_b <= (others => '0');
+				-- rgb 565 format.
+				if (pclk_cnt(0) = '1') then
+					cam_r <= pi_cam_d(7 downto 3);
+					cam_g(5 downto 3) <= pi_cam_d(2 downto 0);
+				else
+					cam_g(2 downto 0) <= pi_cam_d(7 downto 5);
+					cam_b <= pi_cam_d(4 downto 0);
 				end if;
-
-
---				-- rgb 565 format.
---				if (pclk_cnt(0) = '1') then
---					cam_r <= pi_cam_d(7 downto 3);
---					cam_g(5 downto 3) <= pi_cam_d(2 downto 0);
---				else
---					cam_g(2 downto 0) <= pi_cam_d(7 downto 5);
---					cam_b <= pi_cam_d(4 downto 0);
---				end if;
 
 			end if;
 		end if;
